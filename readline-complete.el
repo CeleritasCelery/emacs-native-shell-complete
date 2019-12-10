@@ -1,4 +1,11 @@
-;;; -*- lexical-binding: t -*-
+;;; readline-complete.el --- shell completion using readline style interactions  -*- lexical-binding: t; -*-
+
+;; Copyright (C) 2019 by Troy Hinckley
+
+;; Author: Troy Hinckley <troy.hinckley@gmail.com>
+;; URL: https://github.com/CeleritasCelery/readline-complete
+;; Version: 0.1.0
+;; Package-Requires: ((emacs "25"))
 
 (defvar readline-command "")
 (defvar readline-prefix "")
@@ -11,9 +18,11 @@
                                         ("[A-Z]+> " . tab)))
 
 (defun readline--excluded (x)
+  "Remove unwanted candidates from list."
   (string-match-p readline-exclude-regex x))
 
 (defun readline-setup ()
+  "Setup output redirection to query the source shell."
   (let* ((redirect-buffer (get-buffer-create readline-buffer))
          (proc (get-buffer-process (current-buffer)))
          (beg (process-mark proc))
@@ -39,6 +48,7 @@
                         (_ "\t"))))))
 
 (defun readline-get-completions ()
+  "Using the redirection output get all completion candidates."
   (let* ((cmd (string-remove-suffix
                readline-prefix
                readline-command))
@@ -62,6 +72,8 @@
 
 
 (defun readline-capf ()
+  "Get the candidates that would be triggered by using TAB on an
+interactive shell."
   (readline-setup)
   (comint-redirect-send-command
    readline-redirection-command
@@ -77,6 +89,7 @@
 
 
 (defun company-readline-candidates (callback)
+  "Get candidates for company-readline"
   (add-hook 'comint-redirect-hook
             (lambda ()
               (setq comint-redirect-hook nil)
@@ -86,6 +99,7 @@
    readline-buffer nil t))
 
 (defun company-readline-prefix ()
+  "Get prefix for company-readline"
   (readline-setup)
   (cond
    ((string-prefix-p "-" readline-prefix)
@@ -97,7 +111,7 @@
    (t readline-prefix)))
 
 (defun company-readline (command &optional arg &rest ignored)
-  "completion for native readline functionality."
+  "Completion for native readline functionality."
   (interactive '(interactive))
   (cl-case command
     (interactive (company-begin-backend 'company-readline))
