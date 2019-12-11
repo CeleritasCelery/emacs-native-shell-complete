@@ -12,10 +12,27 @@
 (defvar readline-common "")
 (defvar readline-redirection-command "")
 (defvar readline-buffer " *readline redirect*")
-(defcustom readline-exclude-regex (rx (not (in alnum "-_~/*.+"))))
+(defcustom readline-exclude-regex (rx (not (in alnum "-_~/*.+")))
+  "Regex of elements to ignore when generating candidates.
+Any candidates matching this regex will not be included in final
+  list of candidates.")
 (defcustom readline-style-regex-alist `(("╰─→ " . bash)
-                                        (,(rx (or "% " "[0-9]+> ")) . csh)
-                                        ("[A-Z]+> " . tab)))
+                                        (,(rx (or "% " "[0-9]+> ")) . zsh)
+                                        ("[A-Z]+> " . tab))
+  "An alist of prompt regex and their completion mechanisms.
+the car of each alist element is a regex matching the prompt for
+a particular shell type. The cdr is one of the following symbols
+`bash', `zsh', or `tab'.
+
+- `bash' style uses `M-*' and `echo'
+- `zsh' style uses `C-D'
+- `tab' style uses `TAB'
+
+You may need to test this on an line editing enabled shell to see
+which of these options a particular shell supports. Most shells
+support basic TAB completion, but some will not echo the
+candidate to output when it is the sole completion. Hence the
+need for the other methods as well.")
 
 (defun readline-setup-bash ()
   "Setup support for readline-enabled bash shells.
@@ -59,7 +76,7 @@ setting the `INSIDE_EMACS' environment variable."
     (setq readline-redirection-command
           (concat str (pcase style
                         (`bash "\e* echo ")
-                        (`csh "")
+                        (`zsh "")
                         (_ "\t"))))))
 
 (defun readline-get-completions ()
