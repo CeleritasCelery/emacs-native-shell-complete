@@ -59,7 +59,7 @@ setting the `INSIDE_EMACS' environment variable."
            if (looking-back regex)
            return style))
 
-(defun readline-setup ()
+(defun readline-get-prefix ()
   "Setup output redirection to query the source shell."
   (let* ((redirect-buffer (get-buffer-create readline-buffer))
          (proc (get-buffer-process (current-buffer)))
@@ -94,11 +94,12 @@ setting the `INSIDE_EMACS' environment variable."
                    (buffer-string))))
     (when (or (string-match-p "There are [0-9]+ rows, list them anyway" buffer)
               (string-match-p "Display all [0-9]+ possibilities" buffer))
+      ;; In this case the solution is to increase the number of
+      ;; candidates that can be displayed without query.
       (error "Too many candidates to display"))
     (thread-last (split-string buffer "\n\n")
       (car)
       (ansi-color-filter-apply)
-      (setq foo)
       (replace-regexp-in-string echo-cmd "")
       (string-remove-prefix cmd)
       (split-string)
@@ -111,7 +112,7 @@ setting the `INSIDE_EMACS' environment variable."
 (defun readline-capf ()
   "Get the candidates that would be triggered by using TAB on an
 interactive shell."
-  (readline-setup)
+  (readline-get-prefix)
   (comint-redirect-send-command
    readline-redirection-command
    readline-buffer nil t)
@@ -137,7 +138,7 @@ interactive shell."
 
 (defun company-readline-prefix ()
   "Get prefix for company-readline"
-  (readline-setup)
+  (readline-get-prefix)
   (cond
    ((string-prefix-p "-" readline-prefix)
     (cons readline-prefix t))
