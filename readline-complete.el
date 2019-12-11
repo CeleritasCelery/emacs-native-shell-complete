@@ -17,6 +17,21 @@
                                         (,(rx (or "% " "[0-9]+> ")) . csh)
                                         ("[A-Z]+> " . tab)))
 
+(defun readline-setup-bash ()
+  "Setup support for readline-enabled bash shells.
+This involves not sending the --noediting argument as well as not
+setting the `INSIDE_EMACS' environment variable."
+  (interactive)
+  (advice-add 'comint-term-environment
+              :filter-return 'readline-unset-inside-emacs)
+  (with-eval-after-load 'shell
+    (setq explicit-bash-args
+          (delete "--noediting" explicit-bash-args))))
+
+(defun readline-unset-inside-emacs (env)
+  "Remove INSIDE_EMACS from term envrionment."
+  (cons "INSIDE_EMACS=" env))
+
 (defun readline--excluded (x)
   "Remove unwanted candidates from list."
   (string-match-p readline-exclude-regex x))
