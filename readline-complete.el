@@ -53,6 +53,12 @@ setting the `INSIDE_EMACS' environment variable."
   "Remove unwanted candidates from list."
   (string-match-p readline-exclude-regex x))
 
+(defun readline-get-completion-style ()
+  "Get the completion style based on current prompt."
+  (cl-loop for (regex . style) in readline-style-regex-alist
+           if (looking-back regex)
+           return style))
+
 (defun readline-setup ()
   "Setup output redirection to query the source shell."
   (let* ((redirect-buffer (get-buffer-create readline-buffer))
@@ -64,10 +70,9 @@ setting the `INSIDE_EMACS' environment variable."
          (env-start (or (cl-search "$" str :from-end t) -1))
          (path-start (or (cl-search "/" str :from-end t) -1))
          (prefix-start (1+ (max word-start env-start path-start)))
-         (style (cl-letf (((point) beg))
-                  (cl-loop for (regex . style) in readline-style-regex-alist
-                           if (looking-back regex)
-                           return style)))
+         (style (cl-letf (((point) beg)) (readline-get-completion-style)))
+         ;; sanity check makes sure the input line is empty, which is
+         ;; not useful when doing input completion
          (comint-redirect-perform-sanity-check nil))
     (with-current-buffer redirect-buffer (erase-buffer))
     (setq readline-common (substring str (1+ word-start) prefix-start))
