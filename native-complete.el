@@ -13,6 +13,9 @@
 (defvar native-complete-redirection-command "")
 (defvar native-complete-buffer " *native-complete redirect*")
 
+(defcustom native-complete-major-modes '(shell-mode)
+  "Major modes for which native completion is enabled.")
+
 (defcustom native-complete-exclude-regex (rx (not (in alnum "-_~/*.+")))
   "Regex of elements to ignore when generating candidates.
 Any candidates matching this regex will not be included in final
@@ -115,18 +118,19 @@ setting the `INSIDE_EMACS' environment variable."
 (defun native-complete-at-point ()
   "Get the candidates that would be triggered by using TAB on an
 interactive shell."
-  (native-complete-get-prefix)
-  (comint-redirect-send-command
-   native-complete-redirection-command
-   native-complete-buffer nil t)
-  (unwind-protect
-      (while (or quit-flag (null comint-redirect-completed))
-        (accept-process-output nil 0.1))
-    (unless comint-redirect-completed
-      (comint-redirect-cleanup)))
-  (list (- (point) (length native-complete-prefix))
-        (point)
-        (native-complete-get-completions)))
+  (when (memq major-mode native-complete-major-modes)
+    (native-complete-get-prefix)
+    (comint-redirect-send-command
+     native-complete-redirection-command
+     native-complete-buffer nil t)
+    (unwind-protect
+        (while (or quit-flag (null comint-redirect-completed))
+          (accept-process-output nil 0.1))
+      (unless comint-redirect-completed
+        (comint-redirect-cleanup)))
+    (list (- (point) (length native-complete-prefix))
+          (point)
+          (native-complete-get-completions))))
 
 
 (defun company-native-complete-candidates (callback)
@@ -141,15 +145,16 @@ interactive shell."
 
 (defun company-native-complete-prefix ()
   "Get prefix for company-native-complete"
-  (native-complete-get-prefix)
-  (cond
-   ((string-prefix-p "-" native-complete-prefix)
-    (cons native-complete-prefix t))
-   ((string-match-p "/" native-complete-common)
-    (cons native-complete-prefix
-          (+ (length native-complete-common)
-             (length native-complete-prefix))))
-   (t native-complete-prefix)))
+  (when (memq major-mode native-complete-major-modes)
+    (native-complete-get-prefix)
+    (cond
+     ((string-prefix-p "-" native-complete-prefix)
+      (cons native-complete-prefix t))
+     ((string-match-p "/" native-complete-common)
+      (cons native-complete-prefix
+            (+ (length native-complete-common)
+               (length native-complete-prefix))))
+     (t native-complete-prefix))))
 
 (defun company-native-complete (command &optional arg &rest ignored)
   "Completion for native native-complete functionality."
