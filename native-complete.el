@@ -21,10 +21,7 @@
 Any candidates matching this regex will not be included in final
   list of candidates.")
 
-(defcustom native-complete-style-regex-alist
-  `(("╰─→ " . bash)
-    (,(rx (or "% " "[0-9]+> ")) . zsh)
-    ("[A-Z]+> " . tab))
+(defcustom native-complete-style-regex-alist nil
   "An alist of prompt regex and their completion mechanisms.
 the car of each alist element is a regex matching the prompt for
 a particular shell type. The cdr is one of the following symbols
@@ -61,9 +58,12 @@ setting the `INSIDE_EMACS' environment variable."
 
 (defun native-complete-get-completion-style ()
   "Get the completion style based on current prompt."
-  (cl-loop for (regex . style) in native-complete-style-regex-alist
-           if (looking-back regex)
-           return style))
+  (or (cl-loop for (regex . style) in native-complete-style-regex-alist
+               if (looking-back regex)
+               return style)
+      (cl-loop for style in '(bash zsh csh)
+               if (string-match-p (symbol-name style) shell-file-name)
+               return style)))
 
 (defun native-complete-get-prefix ()
   "Setup output redirection to query the source shell."
@@ -88,7 +88,7 @@ setting the `INSIDE_EMACS' environment variable."
     (setq native-complete-redirection-command
           (concat str (pcase style
                         (`bash "\e* echo ")
-                        (`zsh "")
+                        ((or `zsh `csh) "")
                         (_ "\t"))))))
 
 (defun native-complete-get-completions ()

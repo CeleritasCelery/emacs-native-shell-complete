@@ -15,19 +15,21 @@ function" (capf) and can be enabled by adding it to
 asynchronous backend for the company completion framework. It is enabled by
 adding it to ~company-backends~.
 
-These functions look at the shell prompt to determine which completion style to
-use. A completion style is the mechanism used to get the candidates from the
-native shell. Most shells support ~<tab>~ , but some shells won't give you all the
-candidates consistently without using a different mechanism. There are currently
-the following completion styles:
+These functions look at the shell prompt or process name to determine which
+completion style to use. A completion style is the mechanism used to get the
+candidates from the native shell. Most shells support ~<tab>~ , but some shells
+won't give you all the candidates consistently without using a different
+mechanism. There are currently the following completion styles:
 
 - bash ::   ~M-*~ and ~echo~
 - zsh ::  ~C-D~
 - tab ::  ~<tab>~
 
-Which completion mechanism to use is determined by
-~native-complete-style-regex-alist~. This variable is a alist of ~(prompt-regex .
-mechanism)~ pairs. If the prompt of the current shell matches ~prompt-regex~ then
+Which completion mechanism to use is determined by the ~shell-file-name~, which is
+the executable that is used to start your shell. If the mechanism can't be
+determined from that, or if you use subshells that are a different type, you can
+use ~native-complete-style-regex-alist~. This variable is a alist of ~(prompt-regex
+. mechanism)~ pairs. If the prompt of the current shell matches ~prompt-regex~ then
 the corresponding ~mechanism~ will be used. For example, if your prompt is of the
 form ~user>~ and your shell is bash, you could you the following setting to
 configure that.
@@ -35,7 +37,7 @@ configure that.
   (setq native-complete-style-regex-alist '(("[a-z]+> " . bash)))
 #+END_SRC
 
-To test if your regex is correct, evaluate ~M-:
+To test what completion style your shell is using, evaluate ~M-:
  (native-complete-get-completion-style)~ when the point is at an empty prompt.
  The default completion mechanism is ~tab~.
 
