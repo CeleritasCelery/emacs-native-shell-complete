@@ -16,7 +16,7 @@
 (defcustom native-complete-major-modes '(shell-mode)
   "Major modes for which native completion is enabled.")
 
-(defcustom native-complete-exclude-regex (rx (not (in alnum "-_~/*.+")))
+(defcustom native-complete-exclude-regex (rx (not (in alnum "-_~/*.+$")))
   "Regex of elements to ignore when generating candidates.
 Any candidates matching this regex will not be included in final
   list of candidates.")
@@ -87,7 +87,7 @@ setting the `INSIDE_EMACS' environment variable."
     (setq native-complete-prefix (substring str prefix-start))
     (setq native-complete-redirection-command
           (concat str (pcase style
-                        (`bash "\e* echo ")
+                        (`bash "\e*' echo '")
                         ((or `zsh `csh) "")
                         (_ "\t"))))))
 
