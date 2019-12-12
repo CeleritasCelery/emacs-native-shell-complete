@@ -3,7 +3,7 @@
 ;; Copyright (C) 2019 by Troy Hinckley
 
 ;; Author: Troy Hinckley <troy.hinckley@gmail.com>
-;; URL: github.com/CeleritasCelery/native-complete
+;; URL: github.com/CeleritasCelery/emacs-native-shell-complete
 ;; Version: 0.1.0
 ;; Package-Requires: ((emacs "25"))
 
