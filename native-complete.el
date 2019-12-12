@@ -67,6 +67,8 @@ setting the `INSIDE_EMACS' environment variable."
 
 (defun native-complete-get-prefix ()
   "Setup output redirection to query the source shell."
+  (unless (cl-letf (((point) beg)) (looking-back comint-prompt-regexp))
+    (user-error "`comint-prompt-regexp' does not match prompt"))
   (let* ((redirect-buffer (get-buffer-create native-complete-buffer))
          (proc (get-buffer-process (current-buffer)))
          (beg (process-mark proc))
@@ -103,7 +105,7 @@ setting the `INSIDE_EMACS' environment variable."
               (string-match-p "Display all [0-9]+ possibilities" buffer))
       ;; In this case the solution is to increase the number of
       ;; candidates that can be displayed without query.
-      (error "Too many candidates to display"))
+      (user-error "Too many candidates to display"))
     (thread-last (split-string buffer "\n\n")
       (car)
       (ansi-color-filter-apply)
@@ -164,4 +166,3 @@ interactive shell."
     (prefix (company-native-complete-prefix))
     (candidates (cons :async 'company-native-complete-candidates))
     (ignore-case t)))
-
