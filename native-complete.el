@@ -50,7 +50,7 @@ setting the `INSIDE_EMACS' environment variable."
 
 (defun native-complete-unset-inside-emacs (env)
   "Remove INSIDE_EMACS from term envrionment."
-  (cons "INSIDE_EMACS=" env))
+  (cons "INSIDE_EMACS" env))
 
 (defun native-complete--excluded (x)
   "Remove unwanted candidates from list."
