@@ -64,7 +64,9 @@ This can be set using TTY.
 
 *** csh
 Set the max candidates to a sufficiently high number for the best experience.
+Make sure editing is enabled.
 #+BEGIN_SRC sh
-set listmax=5000
-set listmaxrows=500
+  set listmax=5000
+  set listmaxrows=500
+  set edit
 #+END_SRC
