@@ -111,21 +111,23 @@ setting the `INSIDE_EMACS' environment variable."
          (echo-cmd (concat (regexp-quote native-complete-command) "[]"))
          (buffer (with-current-buffer native-complete-buffer
                    (buffer-string))))
-    (when (or (string-match-p "There are [0-9]+ rows, list them anyway" buffer)
-              (string-match-p "Display all [0-9]+ possibilities" buffer))
-      ;; In this case the solution is to increase the number of
-      ;; candidates that can be displayed without query.
-      (user-error "Too many candidates to display"))
-    (thread-last (split-string buffer "\n\n")
-      (car)
-      (ansi-color-filter-apply)
-      (replace-regexp-in-string echo-cmd "")
-      (string-remove-prefix cmd)
-      (split-string)
-      (cl-remove-if 'native-complete--excluded)
-      (mapcar (lambda (x) (string-remove-prefix native-complete-common x)))
-      (mapcar (lambda (x) (string-remove-suffix "*" x)))
-      (delete-dups))))
+    (if (or (string-match-p "There are [0-9]+ rows, list them anyway" buffer)
+            (string-match-p "Display all [0-9]+ possibilities" buffer))
+        ;; In this case the solution is to increase the number of
+        ;; candidates that can be displayed without query.
+        (progn (message "Too many candidates to display")
+               nil)
+      (thread-last (split-string buffer "\n\n")
+        (car)
+        (ansi-color-filter-apply)
+        (replace-regexp-in-string echo-cmd "")
+        (string-remove-prefix cmd)
+        (split-string)
+        (cl-remove-if 'native-complete--excluded)
+        (mapcar (lambda (x) (string-remove-prefix native-complete-common x)))
+        (mapcar (lambda (x) (string-remove-suffix "*" x)))
+        (cl-remove-if-not (lambda (x) (string-prefix-p native-complete-prefix x)))
+        (delete-dups)))))
 
 (defun native-complete-at-point ()
   "Get the candidates that would be triggered by using TAB on an
