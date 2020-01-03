@@ -65,6 +65,16 @@ setting the `INSIDE_EMACS' environment variable."
                if (string-match-p (symbol-name style) shell-file-name)
                return style)))
 
+(defun native-complete--usable-p ()
+  (and (memq major-mode native-complete-major-modes)
+       (not (string-match-p "Redirection" (or (car mode-line-process) "")))))
+
+(defun $native-complete-abort (&rest _)
+  (when (string-match-p "Redirection" (or (car mode-line-process) ""))
+    (comint-redirect-cleanup)))
+
+(advice-add 'comint-send-input :before '$native-complete-abort)
+
 (defun native-complete-get-prefix ()
   "Setup output redirection to query the source shell."
   (unless (cl-letf (((point) beg)) (looking-back comint-prompt-regexp))
@@ -120,7 +130,7 @@ setting the `INSIDE_EMACS' environment variable."
 (defun native-complete-at-point ()
   "Get the candidates that would be triggered by using TAB on an
 interactive shell."
-  (when (memq major-mode native-complete-major-modes)
+  (when (native-complete--usable-p)
     (native-complete-get-prefix)
     (comint-redirect-send-command
      native-complete-redirection-command
@@ -147,7 +157,7 @@ interactive shell."
 
 (defun company-native-complete-prefix ()
   "Get prefix for company-native-complete"
-  (when (memq major-mode native-complete-major-modes)
+  (when (native-complete--usable-p)
     (native-complete-get-prefix)
     (cond
      ((string-prefix-p "-" native-complete-prefix)
