@@ -77,8 +77,6 @@ setting the `INSIDE_EMACS' environment variable."
 
 (defun native-complete-get-prefix ()
   "Setup output redirection to query the source shell."
-  (unless (cl-letf (((point) beg)) (looking-back comint-prompt-regexp))
-    (user-error "`comint-prompt-regexp' does not match prompt"))
   (let* ((redirect-buffer (get-buffer-create native-complete-buffer))
          (proc (get-buffer-process (current-buffer)))
          (beg (process-mark proc))
@@ -92,6 +90,8 @@ setting the `INSIDE_EMACS' environment variable."
          ;; sanity check makes sure the input line is empty, which is
          ;; not useful when doing input completion
          (comint-redirect-perform-sanity-check nil))
+    (unless (cl-letf (((point) beg)) (looking-back comint-prompt-regexp))
+      (user-error "`comint-prompt-regexp' does not match prompt"))
     (with-current-buffer redirect-buffer (erase-buffer))
     (setq native-complete-common (substring str (1+ word-start)
                                             prefix-start))
