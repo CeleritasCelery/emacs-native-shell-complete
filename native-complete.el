@@ -129,6 +129,7 @@ setting the `INSIDE_EMACS' environment variable."
         (cl-remove-if-not (lambda (x) (string-prefix-p native-complete-prefix x)))
         (delete-dups)))))
 
+;;;###autoload
 (defun native-complete-at-point ()
   "Get the candidates that would be triggered by using TAB on an
 interactive shell."
@@ -170,6 +171,7 @@ interactive shell."
                (length native-complete-prefix))))
      (t native-complete-prefix))))
 
+;;;###autoload
 (defun company-native-complete (command &optional arg &rest ignored)
   "Completion for native native-complete functionality."
   (interactive '(interactive))
@@ -178,3 +180,5 @@ interactive shell."
     (prefix (company-native-complete-prefix))
     (candidates (cons :async 'company-native-complete-candidates))
     (ignore-case t)))
+
+(provide 'native-complete)
