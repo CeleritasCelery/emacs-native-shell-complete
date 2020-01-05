@@ -108,7 +108,8 @@ setting the `INSIDE_EMACS' environment variable."
   (let* ((cmd (string-remove-suffix
                native-complete-prefix
                native-complete-command))
-         (echo-cmd (concat (regexp-quote native-complete-command) "[]"))
+         (echo-cmd (concat (regexp-quote native-complete-command) "[
+]"))
          (buffer (with-current-buffer native-complete-buffer
                    (buffer-string))))
     (if (or (string-match-p "There are [0-9]+ rows, list them anyway" buffer)
@@ -117,9 +118,10 @@ setting the `INSIDE_EMACS' environment variable."
         ;; candidates that can be displayed without query.
         (progn (message "Too many candidates to display")
                nil)
-      (thread-last (split-string buffer "\n\n")
+      (thread-last (split-string buffer "\n
+
+\n")
         (car)
-        (ansi-color-filter-apply)
         (replace-regexp-in-string echo-cmd "")
         (string-remove-prefix cmd)
         (split-string)
