@@ -109,6 +109,7 @@ setting the `INSIDE_EMACS' environment variable."
                native-complete-prefix
                native-complete-command))
          (echo-cmd (concat (regexp-quote native-complete-command) "[]"))
+         (ansi-color-context nil)
          (buffer (with-current-buffer native-complete-buffer
                    (buffer-string))))
     (if (or (string-match-p "There are [0-9]+ rows, list them anyway" buffer)
