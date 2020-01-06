@@ -42,15 +42,10 @@ need for the other methods as well.")
 This involves not sending the --noediting argument as well as not
 setting the `INSIDE_EMACS' environment variable."
   (interactive)
-  (advice-add 'comint-term-environment
-              :filter-return 'native-complete-unset-inside-emacs)
+  (setq comint-terminfo-terminal "vt50")
   (with-eval-after-load 'shell
     (setq explicit-bash-args
           (delete "--noediting" explicit-bash-args))))
-
-(defun native-complete-unset-inside-emacs (env)
-  "Remove INSIDE_EMACS from term envrionment."
-  (cons "INSIDE_EMACS" env))
 
 (defun native-complete--excluded (x)
   "Remove unwanted candidates from list."
