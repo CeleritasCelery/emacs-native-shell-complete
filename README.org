@@ -46,14 +46,17 @@ potential candidates that should not appear in the final completion list.
 
 ** shell setup
 *** bash
-you will need to execute ~native-complete-setup-bash~ /before/ you load your first
-shell. The following configuration is recommended for the best experience.
+Run ~native-complete-setup-bash~ in Emacs /before/ you load
+your first shell.
+#+BEGIN_SRC elisp
+  (with-eval-after-load 'shell
+    (native-complete-setup-bash))
+#+END_SRC
+
+If the ~HISTCONTROL~ environment variable is not set to ~ignorespace~ or ~ignoreboth~
+you will get a lot of garbage in your shell history.
 #+BEGIN_SRC sh
   export HISTCONTROL=ignoreboth
-  bind "set page-completions off"
-  bind "set show-all-if-unmodified on"
-  bind "set show-all-if-ambiguous on"
-  bind "set completion-query-items -1"
 #+END_SRC
 
 Also note that completion in bash works best with command echoing turned off.

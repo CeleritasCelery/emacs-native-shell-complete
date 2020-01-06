@@ -37,10 +37,11 @@ support basic TAB completion, but some will not echo the
 candidate to output when it is the sole completion. Hence the
 need for the other methods as well.")
 
+;;;###autoload
 (defun native-complete-setup-bash ()
   "Setup support for native-complete-enabled bash shells.
-This involves not sending the --noediting argument as well as not
-setting the `INSIDE_EMACS' environment variable."
+This involves not sending the `--noediting' argument as well as
+setting `TERM' to a value other then dumb."
   (interactive)
   (setq comint-terminfo-terminal "vt50")
   (with-eval-after-load 'shell
