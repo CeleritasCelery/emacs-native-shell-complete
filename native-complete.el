@@ -7,11 +7,11 @@
 ;; Version: 0.1.0
 ;; Package-Requires: ((emacs "25"))
 
-(defvar native-complete-command "")
-(defvar native-complete-prefix "")
-(defvar native-complete-common "")
-(defvar native-complete-redirection-command "")
-(defvar native-complete-buffer " *native-complete redirect*")
+(defvar native-complete--command "")
+(defvar native-complete--prefix "")
+(defvar native-complete--common "")
+(defvar native-complete--redirection-command "")
+(defvar native-complete--buffer " *native-complete redirect*")
 
 (defcustom native-complete-major-modes '(shell-mode)
   "Major modes for which native completion is enabled.")
@@ -39,7 +39,7 @@ need for the other methods as well.")
 
 ;;;###autoload
 (defun native-complete-setup-bash ()
-  "Setup support for native-complete-enabled bash shells.
+  "Setup support for native-complete enabled bash shells.
 This involves not sending the `--noediting' argument as well as
 setting `TERM' to a value other then dumb."
   (interactive)
@@ -65,15 +65,15 @@ setting `TERM' to a value other then dumb."
   (and (memq major-mode native-complete-major-modes)
        (not (string-match-p "Redirection" (or (car mode-line-process) "")))))
 
-(defun $native-complete-abort (&rest _)
+(defun native-complete-abort (&rest _)
   (when (string-match-p "Redirection" (or (car mode-line-process) ""))
     (comint-redirect-cleanup)))
 
-(advice-add 'comint-send-input :before '$native-complete-abort)
+(advice-add 'comint-send-input :before 'native-complete-abort)
 
-(defun native-complete-get-prefix ()
+(defun native-complete--get-prefix ()
   "Setup output redirection to query the source shell."
-  (let* ((redirect-buffer (get-buffer-create native-complete-buffer))
+  (let* ((redirect-buffer (get-buffer-create native-complete--buffer))
          (proc (get-buffer-process (current-buffer)))
          (beg (process-mark proc))
          (end (point))
@@ -89,24 +89,24 @@ setting `TERM' to a value other then dumb."
     (unless (cl-letf (((point) beg)) (looking-back comint-prompt-regexp))
       (user-error "`comint-prompt-regexp' does not match prompt"))
     (with-current-buffer redirect-buffer (erase-buffer))
-    (setq native-complete-common (substring str (1+ word-start)
-                                            prefix-start))
-    (setq native-complete-command str)
-    (setq native-complete-prefix (substring str prefix-start))
-    (setq native-complete-redirection-command
+    (setq native-complete--common (substring str (1+ word-start)
+                                             prefix-start))
+    (setq native-complete--command str)
+    (setq native-complete--prefix (substring str prefix-start))
+    (setq native-complete--redirection-command
           (concat str (pcase style
                         (`bash "\e*' echo '")
                         ((or `zsh `csh) "y")
                         (_ "\ty"))))))
 
-(defun native-complete-get-completions ()
+(defun native-complete--get-completions ()
   "Using the redirection output get all completion candidates."
   (let* ((cmd (string-remove-suffix
-               native-complete-prefix
-               native-complete-command))
-         (echo-cmd (concat (regexp-quote native-complete-command) "y?[]"))
+               native-complete--prefix
+               native-complete--command))
+         (echo-cmd (concat (regexp-quote native-complete--command) "y?[]"))
          (ansi-color-context nil)
-         (buffer (with-current-buffer native-complete-buffer
+         (buffer (with-current-buffer native-complete--buffer
                    (buffer-string))))
     (thread-last (split-string buffer "\n\n")
       (car)
@@ -115,9 +115,9 @@ setting `TERM' to a value other then dumb."
       (string-remove-prefix cmd)
       (split-string)
       (cl-remove-if 'native-complete--excluded)
-      (mapcar (lambda (x) (string-remove-prefix native-complete-common x)))
+      (mapcar (lambda (x) (string-remove-prefix native-complete--common x)))
       (mapcar (lambda (x) (string-remove-suffix "*" x)))
-      (cl-remove-if-not (lambda (x) (string-prefix-p native-complete-prefix x)))
+      (cl-remove-if-not (lambda (x) (string-prefix-p native-complete--prefix x)))
       (delete-dups))))
 
 ;;;###autoload
@@ -125,42 +125,42 @@ setting `TERM' to a value other then dumb."
   "Get the candidates that would be triggered by using TAB on an
 interactive shell."
   (when (native-complete--usable-p)
-    (native-complete-get-prefix)
+    (native-complete--get-prefix)
     (comint-redirect-send-command
-     native-complete-redirection-command
-     native-complete-buffer nil t)
+     native-complete--redirection-command
+     native-complete--buffer nil t)
     (unwind-protect
         (while (or quit-flag (null comint-redirect-completed))
           (accept-process-output nil 0.1))
       (unless comint-redirect-completed
         (comint-redirect-cleanup)))
-    (list (- (point) (length native-complete-prefix))
+    (list (- (point) (length native-complete--prefix))
           (point)
-          (native-complete-get-completions))))
+          (native-complete--get-completions))))
 
 
-(defun company-native-complete-candidates (callback)
+(defun company-native-complete--candidates (callback)
   "Get candidates for company-native-complete"
   (add-hook 'comint-redirect-hook
             (lambda ()
               (setq comint-redirect-hook nil)
-              (funcall callback (native-complete-get-completions))))
+              (funcall callback (native-complete--get-completions))))
   (comint-redirect-send-command
-   native-complete-redirection-command
-   native-complete-buffer nil t))
+   native-complete--redirection-command
+   native-complete--buffer nil t))
 
-(defun company-native-complete-prefix ()
+(defun company-native-complete--prefix ()
   "Get prefix for company-native-complete"
   (when (native-complete--usable-p)
-    (native-complete-get-prefix)
+    (native-complete--get-prefix)
     (cond
-     ((string-prefix-p "-" native-complete-prefix)
-      (cons native-complete-prefix t))
-     ((string-match-p "/" native-complete-common)
-      (cons native-complete-prefix
-            (+ (length native-complete-common)
-               (length native-complete-prefix))))
-     (t native-complete-prefix))))
+     ((string-prefix-p "-" native-complete--prefix)
+      (cons native-complete--prefix t))
+     ((string-match-p "/" native-complete--common)
+      (cons native-complete--prefix
+            (+ (length native-complete--common)
+               (length native-complete--prefix))))
+     (t native-complete--prefix))))
 
 ;;;###autoload
 (defun company-native-complete (command &optional arg &rest ignored)
@@ -168,8 +168,8 @@ interactive shell."
   (interactive '(interactive))
   (cl-case command
     (interactive (company-begin-backend 'company-native-complete))
-    (prefix (company-native-complete-prefix))
-    (candidates (cons :async 'company-native-complete-candidates))
+    (prefix (company-native-complete--prefix))
+    (candidates (cons :async 'company-native-complete--candidates))
     (ignore-case t)))
 
 (provide 'native-complete)
