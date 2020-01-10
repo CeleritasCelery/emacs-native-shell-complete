@@ -44,6 +44,12 @@ To test what completion style your shell is using, evaluate ~M-:
 ~native-complete-exclude-regex~ is a regular expression that is used to match
 potential candidates that should not appear in the final completion list.
 
+*** prompt components in completion list
+ if you encouter an issue where parts of your shell prompt are showing up as
+ completion candidates you can add a function to
+ `comint-redirect-filter-functions` to remove the prompt line from the process
+ output. See the doc string of that variable for more details.
+
 ** shell setup
 *** bash
 Run ~native-complete-setup-bash~ in Emacs /before/ you load your first shell.
