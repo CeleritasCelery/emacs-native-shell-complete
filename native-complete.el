@@ -7,6 +7,9 @@
 ;; Version: 0.1.0
 ;; Package-Requires: ((emacs "25"))
 
+(require 'shell)
+(require 'subr-x)
+
 (defvar native-complete--command "")
 (defvar native-complete--prefix "")
 (defvar native-complete--common "")
