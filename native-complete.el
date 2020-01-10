@@ -59,7 +59,8 @@ setting `TERM' to a value other then dumb."
                return style)
       (cl-loop for style in '(bash zsh csh)
                if (string-match-p (symbol-name style) shell-file-name)
-               return style)))
+               return style)
+      'tab))
 
 (defun native-complete--usable-p ()
   (and (memq major-mode native-complete-major-modes)
