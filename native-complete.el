@@ -86,11 +86,16 @@ setting `TERM' to a value other then dumb."
     (unless (cl-letf (((point) beg)) (looking-back comint-prompt-regexp))
       (user-error "`comint-prompt-regexp' does not match prompt"))
     (with-current-buffer redirect-buffer (erase-buffer))
-    (setq native-complete--common (substring str (1+ word-start)
-                                             prefix-start))
-    (setq native-complete--command str)
-    (setq native-complete--prefix (substring str prefix-start))
-    (setq native-complete--redirection-command
+    (setq native-complete--common (substring str (1+ word-start) prefix-start)
+          native-complete--command str
+          native-complete--prefix (substring str prefix-start)
+          ;; When the number of candidates is larger then a certain threshold
+          ;; most shells will query the user before displaying them all. We
+          ;; always send a "y" character to auto-answer these queries so that we
+          ;; get all candidates. We do some special handling in
+          ;; `native-complete--get-completions' to make sure this "y" character
+          ;; never shows up in the completion list.
+          native-complete--redirection-command
           (concat str (pcase style
                         (`bash "\e*' echo '")
                         ((or `zsh `csh) "y")
