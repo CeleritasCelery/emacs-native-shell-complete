@@ -48,10 +48,6 @@ setting `TERM' to a value other then dumb."
     (setq explicit-bash-args
           (delete "--noediting" explicit-bash-args))))
 
-(defun native-complete--excluded (x)
-  "Remove unwanted candidates from list."
-  (string-match-p native-complete-exclude-regex x))
-
 (defun native-complete-get-completion-style ()
   "Get the completion style based on current prompt."
   (or (cl-loop for (regex . style) in native-complete-style-regex-alist
@@ -115,7 +111,7 @@ setting `TERM' to a value other then dumb."
       (replace-regexp-in-string echo-cmd "")
       (string-remove-prefix cmd)
       (split-string)
-      (cl-remove-if 'native-complete--excluded)
+      (cl-remove-if (lambda (x) (string-match-p native-complete-exclude-regex x)))
       (mapcar (lambda (x) (string-remove-prefix native-complete--common x)))
       (mapcar (lambda (x) (string-remove-suffix "*" x)))
       (cl-remove-if-not (lambda (x) (string-prefix-p native-complete--prefix x)))
