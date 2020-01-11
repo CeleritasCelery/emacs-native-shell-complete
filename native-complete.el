@@ -101,15 +101,33 @@ setting `TERM' to a value other then dumb."
   (let* ((cmd (string-remove-suffix
                native-complete--prefix
                native-complete--command))
-         (echo-cmd (concat (regexp-quote native-complete--command) "y?[]"))
+         ;; when the sole completion is something like a directory it does not
+         ;; append a space. We need to seperate this candidate from the "y"
+         ;; character so it will be consumed properly.
+         (continued-cmd
+          (rx-to-string `(: bos (group ,native-complete--command (+ (not space))) "y" (in ""))))
+         (continued-match-fn (lambda (x) (concat (match-string 1 x) " ")))
+         ;; the current command may be echoed multiple times in the output. We
+         ;; only want to leave it when it ends with a space since that means it
+         ;; is the sole completion
+         (echo-cmd
+          (rx-to-string `(: bol ,native-complete--command (* (not space)) (in ""))))
+         ;; Remove the "display all possibilities" query so that it does not get
+         ;; picked up as a completion.
+         (query-text (rx bol (1+ nonl) "? "
+                         (or "[y/n]" "[n/y]" "(y or n)" "(n or y)")
+                         (* nonl) eol))
          (ansi-color-context nil)
          (buffer (with-current-buffer native-complete--buffer
                    (buffer-string))))
     (thread-last (split-string buffer "\n\n")
       (car)
       (ansi-color-filter-apply)
+      (replace-regexp-in-string continued-cmd continued-match-fn)
       (replace-regexp-in-string echo-cmd "")
-      (string-remove-prefix cmd)
+      (replace-regexp-in-string "echo '.+'" "")
+      (replace-regexp-in-string query-text "")
+      (replace-regexp-in-string (concat "^" cmd) "")
       (split-string)
       (cl-remove-if (lambda (x) (string-match-p native-complete-exclude-regex x)))
       (mapcar (lambda (x) (string-remove-prefix native-complete--common x)))
