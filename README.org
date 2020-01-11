@@ -47,7 +47,7 @@ potential candidates that should not appear in the final completion list.
 *** prompt components in completion list
  if you encouter an issue where parts of your shell prompt are showing up as
  completion candidates you can add a function to
- `comint-redirect-filter-functions` to remove the prompt line from the process
+ ~comint-redirect-filter-functions~ to remove the prompt line from the process
  output. See the doc string of that variable for more details.
 
 ** shell setup
@@ -62,12 +62,6 @@ If the ~HISTCONTROL~ environment variable is not set to ~ignorespace~ or ~ignore
 you will get a lot of garbage in your shell history.
 #+BEGIN_SRC sh
   export HISTCONTROL=ignoreboth
-#+END_SRC
-
-Also note that completion in bash works best with command echoing turned off.
-This can be set using TTY.
-#+BEGIN_SRC sh
-  stty -echo
 #+END_SRC
 
 *** csh
