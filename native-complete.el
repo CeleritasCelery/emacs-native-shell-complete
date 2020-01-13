@@ -67,7 +67,7 @@ setting `TERM' to a value other then dumb."
 (defun native-complete-get-completion-style ()
   "Get the completion style based on current prompt."
   (or (cl-loop for (regex . style) in native-complete-style-regex-alist
-               if (looking-back regex)
+               if (looking-back regex (point-min))
                return style)
       (cl-loop for style in '(bash zsh csh)
                if (string-match-p (symbol-name style) shell-file-name)
@@ -98,7 +98,7 @@ setting `TERM' to a value other then dumb."
          ;; sanity check makes sure the input line is empty, which is
          ;; not useful when doing input completion
          (comint-redirect-perform-sanity-check nil))
-    (unless (cl-letf (((point) beg)) (looking-back comint-prompt-regexp))
+    (unless (cl-letf (((point) beg)) (looking-back comint-prompt-regexp (point-min)))
       (user-error "`comint-prompt-regexp' does not match prompt"))
     (with-current-buffer redirect-buffer (erase-buffer))
     (setq native-complete--common (substring str (1+ word-start)
