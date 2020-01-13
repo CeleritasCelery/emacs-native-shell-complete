@@ -8,8 +8,6 @@
 ;; Package-Requires: ((emacs "25"))
 
 (require 'subr-x)
-(eval-when-compile
-  (require 'shell))
 
 (defvar native-complete--command "")
 (defvar native-complete--prefix "")
@@ -46,8 +44,9 @@ which of these options a particular shell supports. Most shells
 support basic TAB completion, but some will not echo the
 candidate to output when it is the sole completion. Hence the
 need for the other methods as well."
-  :type '(alist :key-type regexp :value-type '(options bash zsh tab))
-  )
+  :type '(alist :key-type regexp :value-type '(options bash zsh csh tab)))
+
+(defvar explicit-bash-args)
 
 ;;;###autoload
 (defun native-complete-setup-bash ()
@@ -67,7 +66,7 @@ setting `TERM' to a value other then dumb."
 (defun native-complete-get-completion-style ()
   "Get the completion style based on current prompt."
   (or (cl-loop for (regex . style) in native-complete-style-regex-alist
-               if (looking-back regex (point-min))
+               if (looking-back regex (line-beginning-position 0))
                return style)
       (cl-loop for style in '(bash zsh csh)
                if (string-match-p (symbol-name style) shell-file-name)
@@ -98,7 +97,8 @@ setting `TERM' to a value other then dumb."
          ;; sanity check makes sure the input line is empty, which is
          ;; not useful when doing input completion
          (comint-redirect-perform-sanity-check nil))
-    (unless (cl-letf (((point) beg)) (looking-back comint-prompt-regexp (point-min)))
+    (unless (cl-letf (((point) beg))
+              (looking-back comint-prompt-regexp (line-beginning-position 0)))
       (user-error "`comint-prompt-regexp' does not match prompt"))
     (with-current-buffer redirect-buffer (erase-buffer))
     (setq native-complete--common (substring str (1+ word-start)
@@ -150,6 +150,7 @@ interactive shell."
           (point)
           (native-complete--get-completions))))
 
+(defvar comint-redirect-hook)
 
 (defun company-native-complete--candidates (callback)
   "Get candidates for company-native-complete"
@@ -175,7 +176,7 @@ interactive shell."
      (t native-complete--prefix))))
 
 ;;;###autoload
-(defun company-native-complete (command &optional arg &rest ignored)
+(defun company-native-complete (command &optional _arg &rest ignored)
   "Completion for native native-complete functionality."
   (interactive '(interactive))
   (cl-case command
