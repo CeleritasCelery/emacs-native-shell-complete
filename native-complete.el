@@ -7,19 +7,27 @@
 ;; Version: 0.1.0
 ;; Package-Requires: ((emacs "25"))
 
+(require 'subr-x)
+
 (defvar native-complete--command "")
 (defvar native-complete--prefix "")
 (defvar native-complete--common "")
 (defvar native-complete--redirection-command "")
 (defvar native-complete--buffer " *native-complete redirect*")
 
+(defgroup native-complete nil
+  "Native completion in a shell buffer."
+  :group 'shell)
+
 (defcustom native-complete-major-modes '(shell-mode)
-  "Major modes for which native completion is enabled.")
+  "Major modes for which native completion is enabled."
+  :type '(repeat function))
 
 (defcustom native-complete-exclude-regex (rx (not (in alnum "-_~/*.+$")))
   "Regex of elements to ignore when generating candidates.
 Any candidates matching this regex will not be included in final
-  list of candidates.")
+  list of candidates."
+  :type 'regexp)
 
 (defcustom native-complete-style-regex-alist nil
   "An alist of prompt regex and their completion mechanisms.
@@ -35,7 +43,10 @@ You may need to test this on an line editing enabled shell to see
 which of these options a particular shell supports. Most shells
 support basic TAB completion, but some will not echo the
 candidate to output when it is the sole completion. Hence the
-need for the other methods as well.")
+need for the other methods as well."
+  :type '(alist :key-type regexp :value-type '(options bash zsh csh tab)))
+
+(defvar explicit-bash-args)
 
 ;;;###autoload
 (defun native-complete-setup-bash ()
@@ -52,7 +63,7 @@ setting `TERM' to a value other then dumb."
 (defun native-complete-get-completion-style ()
   "Get the completion style based on current prompt."
   (or (cl-loop for (regex . style) in native-complete-style-regex-alist
-               if (looking-back regex)
+               if (looking-back regex (line-beginning-position 0))
                return style)
       (cl-loop for style in '(bash zsh csh)
                if (string-match-p (symbol-name style) shell-file-name)
@@ -84,7 +95,8 @@ setting `TERM' to a value other then dumb."
          ;; sanity check makes sure the input line is empty, which is
          ;; not useful when doing input completion
          (comint-redirect-perform-sanity-check nil))
-    (unless (cl-letf (((point) beg)) (looking-back comint-prompt-regexp))
+    (unless (cl-letf (((point) beg))
+              (looking-back comint-prompt-regexp (line-beginning-position 0)))
       (user-error "`comint-prompt-regexp' does not match prompt"))
     (with-current-buffer redirect-buffer (erase-buffer))
     (setq native-complete--common (substring str (1+ word-start) prefix-start)
@@ -159,6 +171,7 @@ interactive shell."
           (point)
           (native-complete--get-completions))))
 
+(defvar comint-redirect-hook)
 
 (defun company-native-complete--candidates (callback)
   "Get candidates for company-native-complete"
@@ -184,7 +197,7 @@ interactive shell."
      (t native-complete--prefix))))
 
 ;;;###autoload
-(defun company-native-complete (command &optional arg &rest ignored)
+(defun company-native-complete (command &optional _arg &rest ignored)
   "Completion for native native-complete functionality."
   (interactive '(interactive))
   (cl-case command
