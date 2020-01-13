@@ -55,7 +55,7 @@ This involves not sending the `--noediting' argument as well as
 setting `TERM' to a value other then dumb."
   (interactive)
   (with-eval-after-load 'shell
-    (when (eq comint-terminfo-terminal "dumb")
+    (when (equal comint-terminfo-terminal "dumb")
       (setq comint-terminfo-terminal "vt50"))
     (setq explicit-bash-args
           (delete "--noediting" explicit-bash-args))))
