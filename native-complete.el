@@ -17,13 +17,19 @@
 (defvar native-complete--redirection-command "")
 (defvar native-complete--buffer " *native-complete redirect*")
 
+(defgroup native-complete nil
+  "Native completion in a shell buffer."
+  :group 'shell)
+
 (defcustom native-complete-major-modes '(shell-mode)
-  "Major modes for which native completion is enabled.")
+  "Major modes for which native completion is enabled."
+  :type '(repeat function))
 
 (defcustom native-complete-exclude-regex (rx (not (in alnum "-_~/*.+$")))
   "Regex of elements to ignore when generating candidates.
 Any candidates matching this regex will not be included in final
-  list of candidates.")
+  list of candidates."
+  :type 'regexp)
 
 (defcustom native-complete-style-regex-alist nil
   "An alist of prompt regex and their completion mechanisms.
@@ -39,7 +45,9 @@ You may need to test this on an line editing enabled shell to see
 which of these options a particular shell supports. Most shells
 support basic TAB completion, but some will not echo the
 candidate to output when it is the sole completion. Hence the
-need for the other methods as well.")
+need for the other methods as well."
+  :type '(alist :key-type regexp :value-type '(options bash zsh tab))
+  )
 
 ;;;###autoload
 (defun native-complete-setup-bash ()
