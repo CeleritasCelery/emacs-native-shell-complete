@@ -145,7 +145,7 @@ setting `TERM' to a value other then dumb."
       (replace-regexp-in-string echo-cmd "")
       (replace-regexp-in-string "echo '.+'" "")
       (replace-regexp-in-string query-text "")
-      (replace-regexp-in-string (concat "^" cmd) "")
+      (replace-regexp-in-string (concat "^" (regexp-quote cmd)) "")
       (split-string)
       (cl-remove-if (lambda (x) (string-match-p native-complete-exclude-regex x)))
       (mapcar (lambda (x) (string-remove-prefix native-complete--common x)))
