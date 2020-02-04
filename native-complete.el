@@ -5,7 +5,7 @@
 ;; Author: Troy Hinckley <troy.hinckley@gmail.com>
 ;; URL: github.com/CeleritasCelery/emacs-native-shell-complete
 ;; Version: 0.1.0
-;; Package-Requires: ((emacs "25"))
+;; Package-Requires: ((emacs "25") (company "0.9.3"))
 
 (require 'subr-x)
 
