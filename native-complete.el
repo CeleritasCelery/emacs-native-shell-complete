@@ -119,12 +119,8 @@ setting `TERM' to a value other then dumb."
   (let* ((cmd (string-remove-suffix
                native-complete--prefix
                native-complete--command))
-         ;; when the sole completion is something like a directory it does not
-         ;; append a space. We need to seperate this candidate from the "y"
-         ;; character so it will be consumed properly.
          (continued-cmd
           (rx-to-string `(: bos (group ,native-complete--command (+ (not space))) "y" (in ""))))
-         (continued-match-fn (lambda (x) (concat (match-string 1 x) " ")))
          ;; the current command may be echoed multiple times in the output. We
          ;; only want to leave it when it ends with a space since that means it
          ;; is the sole completion
@@ -137,11 +133,17 @@ setting `TERM' to a value other then dumb."
                          (* nonl) eol))
          (ansi-color-context nil)
          (buffer (with-current-buffer native-complete--buffer
+                   (when (re-search-backward continued-cmd nil t)
+                     ;; when the sole completion is something like a directory
+                     ;; it does not append a space. We need to seperate this
+                     ;; candidate from the "y" character so it will be consumed
+                     ;; properly.
+                     (goto-char (match-end 1))
+                     (insert " "))
                    (buffer-string))))
     (thread-last (split-string buffer "\n\n")
       (car)
       (ansi-color-filter-apply)
-      (replace-regexp-in-string continued-cmd continued-match-fn)
       (replace-regexp-in-string echo-cmd "")
       (replace-regexp-in-string "echo '.+'" "")
       (replace-regexp-in-string query-text "")
