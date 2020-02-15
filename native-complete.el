@@ -1,11 +1,19 @@
-;;; native-complete.el --- shell completion using native complete mechanisms -*- lexical-binding: t; -*-
+;;; native-complete.el --- Shell completion using native complete mechanisms -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2019 by Troy Hinckley
 
 ;; Author: Troy Hinckley <troy.hinckley@gmail.com>
-;; URL: github.com/CeleritasCelery/emacs-native-shell-complete
+;; URL: https://github.com/CeleritasCelery/emacs-native-shell-complete
 ;; Version: 0.1.0
-;; Package-Requires: ((emacs "25") (company "0.9.3"))
+;; Package-Requires: ((emacs "25.1")(company "0.9.0"))
+
+
+;;; Commentary:
+;; This package interacts with a shell's native completion functionality to
+;; provide the same completions in Emacs that you would get from the shell
+;; itself.
+
+;;; Code:
 
 (require 'subr-x)
 
@@ -71,10 +79,12 @@ setting `TERM' to a value other then dumb."
       'tab))
 
 (defun native-complete--usable-p ()
+  "Return non-nil if native-complete can be used at point."
   (and (memq major-mode native-complete-major-modes)
        (not (string-match-p "Redirection" (or (car mode-line-process) "")))))
 
 (defun native-complete-abort (&rest _)
+  "Abort completion and cleanup redirect if needed."
   (when (string-match-p "Redirection" (or (car mode-line-process) ""))
     (comint-redirect-cleanup)))
 
@@ -157,8 +167,9 @@ setting `TERM' to a value other then dumb."
 
 ;;;###autoload
 (defun native-complete-at-point ()
-  "Get the candidates that would be triggered by using TAB on an
-interactive shell."
+  "Get the candidates from the underlying shell.
+This should behave the same as sending TAB in an terminal
+emulator."
   (when (native-complete--usable-p)
     (native-complete--get-prefix)
     (comint-redirect-send-command
@@ -176,7 +187,8 @@ interactive shell."
 (defvar comint-redirect-hook)
 
 (defun company-native-complete--candidates (callback)
-  "Get candidates for company-native-complete"
+  "Get candidates for `company-native-complete'.
+Send results by calling CALLBACK."
   (add-hook 'comint-redirect-hook
             (lambda ()
               (setq comint-redirect-hook nil)
@@ -186,7 +198,7 @@ interactive shell."
    native-complete--buffer nil t))
 
 (defun company-native-complete--prefix ()
-  "Get prefix for company-native-complete"
+  "Get prefix for `company-native-complete'."
   (when (native-complete--usable-p)
     (native-complete--get-prefix)
     (cond
@@ -199,8 +211,9 @@ interactive shell."
      (t native-complete--prefix))))
 
 ;;;###autoload
-(defun company-native-complete (command &optional _arg &rest ignored)
-  "Completion for native native-complete functionality."
+(defun company-native-complete (command &rest _ignored)
+  "Completion for native shell complete functionality.
+Dispatch based on COMMAND."
   (interactive '(interactive))
   (cl-case command
     (interactive (company-begin-backend 'company-native-complete))
@@ -209,3 +222,5 @@ interactive shell."
     (ignore-case t)))
 
 (provide 'native-complete)
+
+;;; native-complete.el ends here
