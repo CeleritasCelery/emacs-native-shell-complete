@@ -5,7 +5,7 @@
 ;; Author: Troy Hinckley <troy.hinckley@gmail.com>
 ;; URL: https://github.com/CeleritasCelery/emacs-native-shell-complete
 ;; Version: 0.1.0
-;; Package-Requires: ((emacs "25.1")(company "0.9.0"))
+;; Package-Requires: ((emacs "25.1"))
 
 
 ;;; Commentary:
@@ -183,43 +183,6 @@ emulator."
     (list (- (point) (length native-complete--prefix))
           (point)
           (native-complete--get-completions))))
-
-(defvar comint-redirect-hook)
-
-(defun company-native-complete--candidates (callback)
-  "Get candidates for `company-native-complete'.
-Send results by calling CALLBACK."
-  (add-hook 'comint-redirect-hook
-            (lambda ()
-              (setq comint-redirect-hook nil)
-              (funcall callback (native-complete--get-completions))))
-  (comint-redirect-send-command
-   native-complete--redirection-command
-   native-complete--buffer nil t))
-
-(defun company-native-complete--prefix ()
-  "Get prefix for `company-native-complete'."
-  (when (native-complete--usable-p)
-    (native-complete--get-prefix)
-    (cond
-     ((string-prefix-p "-" native-complete--prefix)
-      (cons native-complete--prefix t))
-     ((string-match-p "/" native-complete--common)
-      (cons native-complete--prefix
-            (+ (length native-complete--common)
-               (length native-complete--prefix))))
-     (t native-complete--prefix))))
-
-;;;###autoload
-(defun company-native-complete (command &rest _ignored)
-  "Completion for native shell complete functionality.
-Dispatch based on COMMAND."
-  (interactive '(interactive))
-  (cl-case command
-    (interactive (company-begin-backend 'company-native-complete))
-    (prefix (company-native-complete--prefix))
-    (candidates (cons :async 'company-native-complete--candidates))
-    (ignore-case t)))
 
 (provide 'native-complete)
 
