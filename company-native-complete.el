@@ -14,6 +14,7 @@
 ;;; Code:
 
 (require 'native-complete)
+(require 'company)
 
 (defvar comint-redirect-hook)
 
