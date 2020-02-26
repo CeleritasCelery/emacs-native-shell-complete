@@ -78,14 +78,25 @@ setting `TERM' to a value other then dumb."
                return style)
       'tab))
 
+(defun native-complete--redirection-active-p ()
+  "Indicate whether redirection is currently active."
+  (string-match-p "Redirection"
+                  (cond
+                   ((stringp mode-line-process)
+                    mode-line-process)
+                   ((consp mode-line-process)
+                    (car mode-line-process))
+                   (t
+                    ""))))
+
 (defun native-complete--usable-p ()
   "Return non-nil if native-complete can be used at point."
   (and (memq major-mode native-complete-major-modes)
-       (not (string-match-p "Redirection" (or (car mode-line-process) "")))))
+       (not (native-complete--redirection-active-p))))
 
 (defun native-complete-abort (&rest _)
   "Abort completion and cleanup redirect if needed."
-  (when (string-match-p "Redirection" (or (car mode-line-process) ""))
+  (when (native-complete--redirection-active-p)
     (comint-redirect-cleanup)))
 
 (advice-add 'comint-send-input :before 'native-complete-abort)
