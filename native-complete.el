@@ -31,7 +31,7 @@
   "Major modes for which native completion is enabled."
   :type '(repeat function))
 
-(defcustom native-complete-exclude-regex (rx (not (in alnum "-_~/*.+$")))
+(defcustom native-complete-exclude-regex (rx (not (in alnum "-_~()/*.,+$")))
   "Regex of elements to ignore when generating candidates.
 Any candidates matching this regex will not be included in final
   list of candidates."
