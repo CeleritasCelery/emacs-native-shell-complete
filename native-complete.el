@@ -41,6 +41,7 @@ Any candidates matching this regex will not be included in final
   '((bash . "\e*' echo '")
     (zsh . "y")
     (csh . "y")
+    (sqlite . "\t\ty")
     (default . "\ty"))
   "Alist mapping style symbols to strings appended to completion candidates.
 The keys should be the same as the possible values of
@@ -48,7 +49,7 @@ The keys should be the same as the possible values of
   :type '(alist :key-type symbol :value-type string)
   :options '(bash zsh csh sqlite default))
 
-(defcustom native-complete-style-regex-alist nil
+(defcustom native-complete-style-regex-alist '(("^sqlite> " . sqlite))
   "An alist of prompt regex and their completion mechanisms.
 the CAR of each alist element is a regex matching the prompt for
 a particular shell type. The CDR should be one of the keys (CARs)
