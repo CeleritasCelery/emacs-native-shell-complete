@@ -37,22 +37,33 @@ Any candidates matching this regex will not be included in final
   list of candidates."
   :type 'regexp)
 
+(defcustom native-complete-style-suffix-alist
+  '((bash . "\e*' echo '")
+    (zsh . "y")
+    (csh . "y")
+    (default . "\ty"))
+  "Alist mapping style symbols to strings appended to completion candidates.
+The keys should be the same as the possible values of
+`native-complete-style-regex-alist'."
+  :type '(alist :key-type symbol :value-type string)
+  :options '(bash zsh csh sqlite default))
+
 (defcustom native-complete-style-regex-alist nil
   "An alist of prompt regex and their completion mechanisms.
-the car of each alist element is a regex matching the prompt for
-a particular shell type. The cdr is one of the following symbols
-`bash', `zsh', or `tab'.
-
-- `bash' style uses `M-*' and `echo'
-- `zsh' style uses `C-D'
-- `tab' style uses `TAB'
+the CAR of each alist element is a regex matching the prompt for
+a particular shell type. The CDR should be one of the keys (CARs)
+of `native-complete-style-suffix-alist'.
 
 You may need to test this on an line editing enabled shell to see
 which of these options a particular shell supports. Most shells
 support basic TAB completion, but some will not echo the
 candidate to output when it is the sole completion. Hence the
 need for the other methods as well."
-  :type '(alist :key-type regexp :value-type '(options bash zsh csh tab)))
+  :type `(alist
+          :key-type regexp
+          :value-type (choice symbol
+                              ,@(mapcar (lambda (pair) `(const ,(car pair)))
+                                        native-complete-style-suffix-alist))))
 
 (defvar explicit-bash-args)
 
@@ -76,7 +87,13 @@ setting `TERM' to a value other then dumb."
       (cl-loop for style in '(bash zsh csh)
                if (string-match-p (symbol-name style) shell-file-name)
                return style)
-      'tab))
+      'default))
+
+(defun native-complete-get-suffix (style)
+  "Return string to be appended to completion candidates for STYLE.
+See `native-complete-style-suffix-alist'."
+  (or (alist-get style native-complete-style-suffix-alist)
+      (alist-get 'default native-complete-style-suffix-alist)))
 
 (defun native-complete--redirection-active-p ()
   "Indicate whether redirection is currently active."
@@ -130,10 +147,7 @@ setting `TERM' to a value other then dumb."
           ;; `native-complete--get-completions' to make sure this "y" character
           ;; never shows up in the completion list.
           native-complete--redirection-command
-          (concat str (pcase style
-                        (`bash "\e*' echo '")
-                        ((or `zsh `csh) "y")
-                        (_ "\ty"))))))
+          (concat str (native-complete-get-suffix style)))))
 
 (defun native-complete--get-completions ()
   "Using the redirection output get all completion candidates."
