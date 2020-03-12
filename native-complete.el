@@ -49,7 +49,8 @@ The keys should be the same as the possible values of
   :type '(alist :key-type symbol :value-type string)
   :options '(bash zsh csh sqlite default))
 
-(defcustom native-complete-style-regex-alist '(("^sqlite> " . sqlite))
+(defcustom native-complete-style-regex-alist
+  `((,(rx bol (or "   ..." "sqlite") "> ") . sqlite))
   "An alist of prompt regex and their completion mechanisms.
 the CAR of each alist element is a regex matching the prompt for
 a particular shell type. The CDR should be one of the keys (CARs)
