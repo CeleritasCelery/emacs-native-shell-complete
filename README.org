@@ -8,6 +8,7 @@ Currently this has been tested in
 
 - bash
 - csh
+- sqlite
 - various CAD tool shells
 
 ** Emacs setup
@@ -27,6 +28,13 @@ mechanism. There are currently the following completion styles:
 - bash ::   ~M-*~ and ~echo~
 - zsh ::  ~C-D~
 - tab ::  ~<tab>~
+- sqlite :: =<tab> <tab>=
+
+You can add your own completion styles by adding to
+~native-complete-style-suffix-alist~. This is an alist of ~(style .
+completion-suffix)~ pairs. If you discover a new completion style that would be
+generally applicable, opening a PR would be appreciated. This will improve the
+supported shells of ~native-complete~ out of the box.
 
 Which completion mechanism to use is determined by the ~shell-file-name~, which is
 the executable that is used to start your shell. If the mechanism can't be
