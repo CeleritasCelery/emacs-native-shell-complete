@@ -84,7 +84,8 @@ setting `TERM' to a value other then dumb."
                   (cond
                    ((stringp mode-line-process)
                     mode-line-process)
-                   ((consp mode-line-process)
+                   ((and (consp mode-line-process)
+                         (stringp (car mode-line-process)))
                     (car mode-line-process))
                    (t
                     ""))))
