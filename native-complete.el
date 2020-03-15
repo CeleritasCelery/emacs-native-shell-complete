@@ -30,6 +30,7 @@
 ;;; Code:
 
 (require 'subr-x)
+(require 'shell)
 
 (defvar native-complete--command "")
 (defvar native-complete--prefix "")
@@ -80,8 +81,6 @@ need for the other methods as well."
           :value-type (choice symbol
                               ,@(mapcar (lambda (pair) `(const ,(car pair)))
                                         native-complete-style-suffix-alist))))
-
-(defvar explicit-bash-args)
 
 ;;;###autoload
 (defun native-complete-setup-bash ()
