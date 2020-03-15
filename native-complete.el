@@ -88,11 +88,10 @@ need for the other methods as well."
 This involves not sending the `--noediting' argument as well as
 setting `TERM' to a value other then dumb."
   (interactive)
-  (with-eval-after-load 'shell
-    (when (equal comint-terminfo-terminal "dumb")
-      (setq comint-terminfo-terminal "vt50"))
-    (setq explicit-bash-args
-          (delete "--noediting" explicit-bash-args))))
+  (when (equal comint-terminfo-terminal "dumb")
+    (setq comint-terminfo-terminal "vt50"))
+  (setq explicit-bash-args
+        (delete "--noediting" explicit-bash-args)))
 
 (defun native-complete-get-completion-style ()
   "Get the completion style based on current prompt."
@@ -132,7 +131,7 @@ See `native-complete-style-suffix-alist'."
   (when (native-complete--redirection-active-p)
     (comint-redirect-cleanup)))
 
-(advice-add 'comint-send-input :before 'native-complete-abort)
+(advice-add 'comint-send-input :before #'native-complete-abort)
 
 (defun native-complete--get-prefix ()
   "Setup output redirection to query the source shell."
