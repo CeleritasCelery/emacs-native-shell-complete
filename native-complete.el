@@ -204,6 +204,10 @@ See `native-complete-style-suffix-alist'."
       (cl-remove-if-not (lambda (x) (string-prefix-p native-complete--prefix x)))
       (delete-dups))))
 
+(defun native-complete-unload-function ()
+  "Unload `native-complete'."
+  (advice-remove 'comint-send-input 'native-complete-abort))
+
 ;;;###autoload
 (defun native-complete-at-point ()
   "Get the candidates from the underlying shell.
