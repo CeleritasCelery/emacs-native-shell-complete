@@ -1,4 +1,7 @@
 * Native complete
+
+[[https://melpa.org/#/native-complete][file:https://melpa.org/packages/native-complete-badge.svg]]
+
 This package interacts with a shell's native completion functionality to provide
 the same completions in Emacs that you would get from the shell itself.
 
@@ -12,10 +15,11 @@ Currently this has been tested in
 - various CAD tool shells
 
 ** Emacs setup
-This package contains two completion functions; ~native-complete-at-point~ and
-~company-native-complete~. ~native-complete-at-point~ is a "completion at point
-function" (capf) and can be enabled by adding it to
-~completion-at-point-functions~ in a shell buffer. ~company-native-complete~ is an
+This project contains two completion packages, ~native-complete~ for basic
+completion and ~company-native-complete~ for ~company-mode~. ~native-complete~
+provides which is a "completion at point function" (capf) and can be enabled by
+adding it to ~completion-at-point-functions~ in a shell buffer.
+~company-native-complete~ provides a function of the same name which is an
 asynchronous backend for the company completion framework. It is enabled by
 adding it to ~company-backends~.
 
