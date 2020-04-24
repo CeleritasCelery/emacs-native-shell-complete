@@ -43,7 +43,7 @@ ubnx000723>"
                   (native-complete--get-completions))
                  '("git" "git-cvsserver" "gitlab-runner"
                    "git-parse-remote" "git-show" "git-cvsexportcommit"
-                   "git-instaweb" "git-pack-redundant" "git-shell"
+                   "git-instawb" "git-pack-redundant" "git-shell"
                    "git-write-tree" "git-cvsimport" "gitk"
                    "git-pack-refs" "git-shortlog"))))
 
