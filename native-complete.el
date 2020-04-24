@@ -133,17 +133,22 @@ See `native-complete-style-suffix-alist'."
 
 (advice-add 'comint-send-input :before #'native-complete-abort)
 
+(defun native-complete--split-command (cmd)
+  "Split the command into the common and prefix sections"
+  (let* ((word-start (or (cl-search " " cmd :from-end t) -1))
+         (env-start (or (cl-search "$" cmd :from-end t) -1))
+         (path-start (or (cl-search "/" cmd :from-end t) -1))
+         (prefix-start (1+ (max word-start env-start path-start))))
+    (cons (substring cmd (1+ word-start) prefix-start)
+          (substring cmd prefix-start))))
+
 (defun native-complete--get-prefix ()
   "Setup output redirection to query the source shell."
   (let* ((redirect-buffer (get-buffer-create native-complete--buffer))
          (proc (get-buffer-process (current-buffer)))
          (beg (process-mark proc))
          (end (point))
-         (str (buffer-substring-no-properties beg end))
-         (word-start (or (cl-search " " str :from-end t) -1))
-         (env-start (or (cl-search "$" str :from-end t) -1))
-         (path-start (or (cl-search "/" str :from-end t) -1))
-         (prefix-start (1+ (max word-start env-start path-start)))
+         (cmd (buffer-substring-no-properties beg end))
          (style (cl-letf (((point) beg)) (native-complete-get-completion-style)))
          ;; sanity check makes sure the input line is empty, which is
          ;; not useful when doing input completion
@@ -152,17 +157,18 @@ See `native-complete-style-suffix-alist'."
               (looking-back comint-prompt-regexp (line-beginning-position 0)))
       (user-error "`comint-prompt-regexp' does not match prompt"))
     (with-current-buffer redirect-buffer (erase-buffer))
-    (setq native-complete--common (substring str (1+ word-start) prefix-start)
-          native-complete--command str
-          native-complete--prefix (substring str prefix-start)
-          ;; When the number of candidates is larger then a certain threshold
-          ;; most shells will query the user before displaying them all. We
-          ;; always send a "y" character to auto-answer these queries so that we
-          ;; get all candidates. We do some special handling in
-          ;; `native-complete--get-completions' to make sure this "y" character
-          ;; never shows up in the completion list.
-          native-complete--redirection-command
-          (concat str (native-complete-get-suffix style)))))
+    (cl-destructuring-bind (common . prefix) (native-complete--split-command cmd)
+      (setq native-complete--command cmd
+            native-complete--common common
+            native-complete--prefix prefix
+            ;; When the number of candidates is larger then a certain threshold
+            ;; most shells will query the user before displaying them all. We
+            ;; always send a "y" character to auto-answer these queries so that
+            ;; we get all candidates. We do some special handling in
+            ;; `native-complete--get-completions' to make sure this "y"
+            ;; character never shows up in the completion list.
+            native-complete--redirection-command
+            (concat cmd (native-complete-get-suffix style))))))
 
 (defun native-complete--get-completions ()
   "Using the redirection output get all completion candidates."
