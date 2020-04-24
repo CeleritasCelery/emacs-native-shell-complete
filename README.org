@@ -1,6 +1,7 @@
 * Native complete
 
 [[https://melpa.org/#/native-complete][file:https://melpa.org/packages/native-complete-badge.svg]]
+[[https://github.com/CeleritasCelery/emacs-native-shell-complete/actions?query=workflow%3ACI][file:https://github.com/CeleritasCelery/emacs-native-shell-complete/workflows/CI/badge.svg]]
 
 This package interacts with a shell's native completion functionality to provide
 the same completions in Emacs that you would get from the shell itself.
