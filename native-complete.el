@@ -157,6 +157,7 @@ See `native-complete-style-suffix-alist'."
               (looking-back comint-prompt-regexp (line-beginning-position 0)))
       (user-error "`comint-prompt-regexp' does not match prompt"))
     (with-current-buffer redirect-buffer (erase-buffer))
+    (setq cmd (replace-regexp-in-string (rx (in "'\"")) "" cmd))
     (cl-destructuring-bind (common . prefix) (native-complete--split-command cmd)
       (setq native-complete--command cmd
             native-complete--common common
