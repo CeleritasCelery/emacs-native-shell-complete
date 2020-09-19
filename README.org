@@ -20,10 +20,16 @@ Currently this has been tested in
 
 ** Emacs setup
 This project contains two completion packages, ~native-complete~ for basic
-completion and ~company-native-complete~ for ~company-mode~. ~native-complete~
+completion and ~company-native-complete~ for ~company-mode~.  
+Choose one.  Why are there two? 
+[[https://github.com/company-mode/company-mode/issues/68#issuecomment-36208504][Here]] 
+and [[https://github.com/auto-complete/auto-complete/issues/503][here]]
+are two comparisons of the two main modular completion frameworks for Emacs: auto-complete and CompAny (Complete Any).
+The standard and the leading shiny new alternative.   For users of the built-in auto-complete package, 
+~native-complete~
 provides ~native-complete-at-point~ which is a "completion at point function"
 (capf) and can be enabled by adding it to ~completion-at-point-functions~ in a
-shell buffer. ~company-native-complete~ provides a function of the same name which
+shell buffer. For users of the add-on company package ~company-native-complete~ provides a function of the same name which
 is an asynchronous backend for the company completion framework. It is enabled
 by adding it to ~company-backends~.
 
