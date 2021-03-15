@@ -43,7 +43,7 @@
   "Native completion in a shell buffer."
   :group 'shell)
 
-(defcustom native-complete-major-modes '(shell-mode)
+(defcustom native-complete-major-modes '(shell-mode comint-mode)
   "Major modes for which native completion is enabled."
   :type '(repeat function))
 
