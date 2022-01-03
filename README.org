@@ -18,18 +18,24 @@ Currently this has been tested in
 - csh
 - sqlite
 
-** Emacs setup
-This project contains two completion packages, ~native-complete~ for basic
-completion and ~company-native-complete~ for ~company-mode~. ~native-complete~
-provides ~native-complete-at-point~ which is a "completion at point function"
-(capf) and can be enabled by adding it to ~completion-at-point-functions~ in a
-shell buffer. ~company-native-complete~ provides a function of the same name which
-is an asynchronous backend for the company completion framework. It is enabled
-by adding it to ~company-backends~.
+* Setup steps:
 
-** shell setup
+** 1. Emacs setup
+
+This project contains two completion packages, ~native-complete~ for basic auto-complete
+completion and ~company-native-complete~ for [[https://github.com/company-mode/company-mode/issues/68#issuecomment-36208504][company-mode]]. Choose one.
+
+It can be installed from Melpa with M-x `package-install' RET [company-]native-complete.
+It can also be installed manually in the traditional way, just be mindful of the dependencies.
+
+
+For users of the built-in auto-complete package, ~native-complete~ provides ~native-complete-at-point~ which is a "completion at point function" (capf) and can be enabled by adding it to ~completion-at-point-functions~ in a
+shell buffer. For users of the add-on company package ~company-native-complete~ provides a function of the same name which is an asynchronous backend for the company completion framework. It is enabled by adding it to ~company-backends~.
+
+** 2. shell setup
 *** bash
-Run ~native-complete-setup-bash~ in Emacs /before/ you load your first shell.
+Run ~native-complete-setup-bash~ in Emacs /before/ you load your first shell.  
+(Add this to your emacs configuration file.)
 #+BEGIN_SRC elisp
   (with-eval-after-load 'shell
     (native-complete-setup-bash))
@@ -48,7 +54,7 @@ Make sure editing is enabled.
 #+END_SRC
 
 ** Advanced setup
-For most users this package should work out the box. However if you are using an
+For most users this package should work out the box after the above steps. However if you are using an
 unusual shell or are invoking subshells that are a different type then your main
 shell, you may need add some additional configuration.
 
