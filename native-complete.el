@@ -243,9 +243,9 @@ emulator."
       (or (native-complete-tree-assoc key (car tree))
           (native-complete-tree-assoc key (cdr tree))))))
 
-
 ;;;###autoload
 (defun native-complete-check-config ()
+  (interactive)
   "Check the setup of native complete and look for common problems."
   (unless (memq major-mode native-complete-major-modes)
     (user-error "`native-complete-check-setup' must be run from a shell buffer"))
