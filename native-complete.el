@@ -235,6 +235,39 @@ emulator."
           (point)
           (native-complete--get-completions))))
 
+(defun native-complete-tree-assoc (key tree)
+  "Search a list tree structure for key."
+  (when (consp tree)
+    (if (eq (car tree) key)
+        t
+      (or (native-complete-tree-assoc key (car tree))
+          (native-complete-tree-assoc key (cdr tree))))))
+
+
+;;;###autoload
+(defun native-complete-check-config ()
+  "Check the setup of native complete and look for common problems."
+  (unless (memq major-mode native-complete-major-modes)
+    (user-error "`native-complete-check-setup' must be run from a shell buffer"))
+  (let* ((prompt-point (process-mark (get-buffer-process (current-buffer))))
+         (completion-style (cl-letf (((point) prompt-point))
+                             (native-complete-get-completion-style))))
+    (when (equal comint-prompt-regexp "^")
+      (user-error "error: `comint-prompt-regexp' has not been updated. See README for details.\n"))
+    (unless (cl-letf (((point) prompt-point))
+              (looking-back comint-prompt-regexp (line-beginning-position 0)))
+      (user-error "error: prompt does not match `comint-prompt-regex'. expected '%s', found '%s'"
+                  comint-prompt-regexp (buffer-substring (line-beginning-position) (point))))
+    (when (eq 'bash completion-style)
+      (when (equal comint-terminfo-terminal "dumb")
+        (user-error "error: `native-complete-setup-bash' not called. Bash is not setup")))
+    (if (featurep 'company)
+        (unless (native-complete-tree-assoc 'company-native-complete company-backends)
+          (user-error "error: `company-native-complete' not one of `company-backends'"))
+      (unless (native-complete-tree-assoc 'native-complete-at-point completion-at-point-functions)
+        (user-error "error: `native-complete-at-point' not one of `completion-at-point-functions'")))
+    (message "Success: native-complete setup for %s" completion-style)))
+
 (provide 'native-complete)
 
 ;;; native-complete.el ends here

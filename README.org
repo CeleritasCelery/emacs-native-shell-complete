@@ -3,12 +3,7 @@
 [[https://melpa.org/#/native-complete][file:https://melpa.org/packages/native-complete-badge.svg]]
 [[https://github.com/CeleritasCelery/emacs-native-shell-complete/actions?query=workflow%3ACI][file:https://github.com/CeleritasCelery/emacs-native-shell-complete/workflows/CI/badge.svg]]
 
-This package provides the exact same completions in ~shell-mode~ as you get in a
-[[https://www.gnu.org/software/emacs/manual/html_node/emacs/Terminal-emulator.html][terminal emulator]] with the =TAB= key. This means that completions are always
-accurate and synchronized with your current directory and shell environment.
-This also means that subshell completion works correctly. This is in contrast to
-packages like [[https://github.com/szermatt/emacs-bash-completion][emacs-bash-completion]] that use a separate process to generate
-"best guess" completions.
+This package provides the exact same completions in ~shell-mode~ as you get in a [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Terminal-emulator.html][terminal emulator]] with the =TAB= key. This means that completions are always accurate and synchronized with your current directory and shell environment. This also means that subshell completion works correctly. This is in contrast to packages like [[https://github.com/szermatt/emacs-bash-completion][emacs-bash-completion]] that use a separate process to generate "best guess" completions.
 
 [[file:images/demo.gif]]
 
@@ -16,23 +11,32 @@ Currently this has been tested in
 
 - bash
 - csh
+- zsh
 - sqlite
 
-* Setup steps:
+* Setup steps
+**  Emacs setup
+Install from Melpa with ~M-x package-install~.
 
-** 1. Emacs setup
+This project contains two completion packages, ~native-complete~ for basic auto-complete completion and ~company-native-complete~ for [[https://company-mode.github.io/][company-mode]]. Choose one.
 
-This project contains two completion packages, ~native-complete~ for basic auto-complete
-completion and ~company-native-complete~ for [[https://github.com/company-mode/company-mode/issues/68#issuecomment-36208504][company-mode]]. Choose one.
+*** If using default (built-in) completion
+For users of the built-in auto-complete package, ~native-complete~ provides ~native-complete-at-point~ which is a "completion at point function" (capf) and can be enabled by adding it to ~completion-at-point-functions~ in a shell buffer.
 
-It can be installed from Melpa with M-x `package-install' RET [company-]native-complete.
-It can also be installed manually in the traditional way, just be mindful of the dependencies.
+*** If using company mode
+For users of the add-on company package ~company-native-complete~ provides a function of the same name which is an asynchronous backend for the company completion framework. It is enabled by adding it as a [[https://company-mode.github.io/manual/Backends.html#Backends][company backend]]. For example, you could add the following to your init file.
 
+#+begin_src elisp
+(add-to-list 'company-backends 'company-native-complete)
+#+end_src
 
-For users of the built-in auto-complete package, ~native-complete~ provides ~native-complete-at-point~ which is a "completion at point function" (capf) and can be enabled by adding it to ~completion-at-point-functions~ in a
-shell buffer. For users of the add-on company package ~company-native-complete~ provides a function of the same name which is an asynchronous backend for the company completion framework. It is enabled by adding it to ~company-backends~.
+*** Customize the prompt regex
+You need to set the variable ~comint-prompt-regex~ to a regex that will match your shell prompt. The following is a good default for ~bash~, ~zsh~, and ~csh~.
+#+begin_src elisp
+  (add-hook 'shell-mode-hook (lambda () (setq comint-prompt-regex "^.+[$%>] ")) )
+#+end_src
 
-** 2. shell setup
+** shell setup
 *** bash
 Run ~native-complete-setup-bash~ in Emacs /before/ you load your first shell.  
 (Add this to your emacs configuration file.)
@@ -53,49 +57,28 @@ Make sure editing is enabled.
   set edit
 #+END_SRC
 
+** Check the config
+Once the above steps are complete, run ~native-complete-check-config~ in a shell buffer to check for common problems. If it reports success you should be good to go.
 ** Advanced setup
-For most users this package should work out the box after the above steps. However if you are using an
-unusual shell or are invoking subshells that are a different type then your main
-shell, you may need add some additional configuration.
+For most users this package should work out the box after the above steps. However if you are using an unusual shell or are invoking subshells that are a different type then your main shell, you may need add some additional configuration.
 
-Native complete look at the shell prompt or process name to determine which
-completion style to use. A completion style is the key used to get the
-candidates from the native shell. Most shells support ~<tab>~ , but some shells
-won't give you all the candidates consistently without using a different
-style. There are currently the following completion styles:
+Native complete look at the shell prompt or process name to determine which completion style to use. A completion style is the key used to get the candidates from the native shell. Most shells support ~<tab>~ , but some shells won't give you all the candidates consistently without using a different style. There are currently the following completion styles:
 
 - bash ::   ~M-*~
 - zsh ::  ~C-D~
 - tab ::  ~<tab>~
 - sqlite :: =<tab> <tab>=
 
-Which completion style to use is determined by the ~shell-file-name~, which is
-the executable that is used to start your shell. If the style can't be
-determined from that, or if you use subshells that are a different type, you can
-use ~native-complete-style-regex-alist~. This variable is a alist of ~(prompt-regex
-. style)~ pairs. If the prompt of the current shell matches ~prompt-regex~ then
-the corresponding ~style~ will be used. For example, if your prompt is of the
-form ~user>~ and your shell is bash, you could you the following setting to
-configure that.
+Which completion style to use is determined by the ~shell-file-name~, which is the executable that is used to start your shell. If the style can't be determined from that, or if you use subshells that are a different type, you can use ~native-complete-style-regex-alist~. This variable is a alist of ~(prompt-regex . style)~ pairs. If the prompt of the current shell matches ~prompt-regex~ then the corresponding ~style~ will be used. For example, if your prompt is of the form ~user>~ and your shell is bash, you could you the following setting to configure that.
 #+BEGIN_SRC elisp
   (setq native-complete-style-regex-alist '(("[a-z]+> " . bash)))
 #+END_SRC
 
-To test what completion style your shell is using, evaluate ~M-:
- (native-complete-get-completion-style)~ when the point is at an empty prompt.
- The default completion style is ~tab~.
+To test what completion style your shell is using, evaluate ~M-: (native-complete-get-completion-style)~ when the point is at an empty prompt. The default completion style is ~tab~.
 
-You can add your own completion styles by adding to
-~native-complete-style-suffix-alist~. This is an alist of ~(style .
-completion-suffix)~ pairs. If you discover a new completion style that would be
-generally applicable, opening a PR would be appreciated. This will improve the
-supported shells of ~native-complete~ out of the box.
+You can add your own completion styles by adding to ~native-complete-style-suffix-alist~. This is an alist of ~(style . completion-suffix)~ pairs. If you discover a new completion style that would be generally applicable, opening a PR would be appreciated. This will improve the supported shells of ~native-complete~ out of the box.
 
-~native-complete-exclude-regex~ is a regular expression that is used to match
-potential candidates that should not appear in the final completion list.
+~native-complete-exclude-regex~ is a regular expression that is used to match potential candidates that should not appear in the final completion list.
 
 *** prompt components in completion list
- if you encouter an issue where parts of your shell prompt are showing up as
- completion candidates you can add a function to
- ~comint-redirect-filter-functions~ to remove the prompt line from the process
- output. See the doc string of that variable for more details.
+ if you encouter an issue where parts of your shell prompt are showing up as completion candidates you can add a function to ~comint-redirect-filter-functions~ to remove the prompt line from the process output. See the doc string of that variable for more details.
