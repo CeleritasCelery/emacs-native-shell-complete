@@ -266,7 +266,7 @@ emulator."
           (user-error "error: `company-native-complete' not one of `company-backends'"))
       (unless (native-complete-tree-assoc 'native-complete-at-point completion-at-point-functions)
         (user-error "error: `native-complete-at-point' not one of `completion-at-point-functions'")))
-    (message "Success: native-complete setup for %s" completion-style)))
+    (message "Success: native-complete setup for '%s' completion" completion-style)))
 
 (provide 'native-complete)
 

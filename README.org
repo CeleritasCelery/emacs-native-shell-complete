@@ -33,7 +33,7 @@ For users of the add-on company package ~company-native-complete~ provides a fun
 *** Customize the prompt regex
 You need to set the variable ~comint-prompt-regex~ to a regex that will match your shell prompt. The following is a good default for ~bash~, ~zsh~, and ~csh~.
 #+begin_src elisp
-  (add-hook 'shell-mode-hook (lambda () (setq comint-prompt-regex "^.+[$%>] ")) )
+  (add-hook 'shell-mode-hook (lambda () (setq comint-prompt-regex "^.+[$%>] ")))
 #+end_src
 
 ** shell setup
@@ -62,7 +62,7 @@ Once the above steps are complete, run ~native-complete-check-config~ in a shell
 ** Advanced setup
 For most users this package should work out the box after the above steps. However if you are using an unusual shell or are invoking subshells that are a different type then your main shell, you may need add some additional configuration.
 
-Native complete look at the shell prompt or process name to determine which completion style to use. A completion style is the key used to get the candidates from the native shell. Most shells support ~<tab>~ , but some shells won't give you all the candidates consistently without using a different style. There are currently the following completion styles:
+Native complete look at the shell prompt or process name to determine which completion style to use. A completion style is the key used to get the candidates from the native shell. Most shells support ~<tab>~ , but some shells won't give you all the candidates consistently without using a different style (key sequence). There are currently the following completion styles:
 
 - bash ::   ~M-*~
 - zsh ::  ~C-D~
@@ -74,7 +74,7 @@ Which completion style to use is determined by the ~shell-file-name~, which is t
   (setq native-complete-style-regex-alist '(("[a-z]+> " . bash)))
 #+END_SRC
 
-To test what completion style your shell is using, evaluate ~M-: (native-complete-get-completion-style)~ when the point is at an empty prompt. The default completion style is ~tab~.
+To test what completion style your shell is using, call ~native-complete-check-config~ from a shell buffer. The default completion style is ~tab~.
 
 You can add your own completion styles by adding to ~native-complete-style-suffix-alist~. This is an alist of ~(style . completion-suffix)~ pairs. If you discover a new completion style that would be generally applicable, opening a PR would be appreciated. This will improve the supported shells of ~native-complete~ out of the box.
 
