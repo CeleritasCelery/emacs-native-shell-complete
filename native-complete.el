@@ -97,7 +97,7 @@ setting `TERM' to a value other then dumb."
 (defun native-complete-get-completion-style ()
   "Get the completion style based on current prompt."
   (or (cl-loop for (regex . style) in native-complete-style-regex-alist
-               if (looking-back regex (line-beginning-position 0))
+               if (native-complete--at-prompt-p regex)
                return style)
       (cl-loop for style in '(bash zsh csh)
                if (string-match-p (symbol-name style) shell-file-name)
@@ -109,6 +109,14 @@ setting `TERM' to a value other then dumb."
 See `native-complete-style-suffix-alist'."
   (or (alist-get style native-complete-style-suffix-alist)
       (alist-get 'default native-complete-style-suffix-alist)))
+
+(defun native-complete--at-prompt-p (regex)
+  "Point matches the end of a prompt defined by REGEX"
+  ;; `inhibit-field-text-motion' alows `line-beginning-position' to move past
+  ;; the process mark, which has a special text property marking it as a
+  ;; different field.
+  (let ((inhibit-field-text-motion t))
+    (looking-back regex (line-beginning-position))))
 
 (defun native-complete--redirection-active-p ()
   "Indicate whether redirection is currently active."
@@ -155,7 +163,7 @@ See `native-complete-style-suffix-alist'."
          ;; not useful when doing input completion
          (comint-redirect-perform-sanity-check nil))
     (unless (cl-letf (((point) beg))
-              (looking-back comint-prompt-regexp (line-beginning-position 0)))
+              (native-complete--at-prompt-p comint-prompt-regexp))
       (user-error "`comint-prompt-regexp' does not match prompt"))
     (with-current-buffer redirect-buffer (erase-buffer))
     (setq cmd (replace-regexp-in-string (rx (in "'\"")) "" cmd))
@@ -251,13 +259,14 @@ emulator."
     (user-error "`native-complete-check-setup' must be run from a shell buffer"))
   (let* ((prompt-point (process-mark (get-buffer-process (current-buffer))))
          (completion-style (cl-letf (((point) prompt-point))
-                             (native-complete-get-completion-style))))
+                             (native-complete-get-completion-style)))
+         (inhibit-field-text-motion t))
     (when (equal comint-prompt-regexp "^")
       (user-error "error: `comint-prompt-regexp' has not been updated. See README for details.\n"))
     (unless (cl-letf (((point) prompt-point))
-              (looking-back comint-prompt-regexp (line-beginning-position 0)))
+              (native-complete--at-prompt-p comint-prompt-regexp))
       (user-error "error: prompt does not match `comint-prompt-regex'. expected '%s', found '%s'"
-                  comint-prompt-regexp (buffer-substring (line-beginning-position 0) prompt-point)))
+                  comint-prompt-regexp (buffer-substring (line-beginning-position) prompt-point)))
     (when (eq 'bash completion-style)
       (when (equal comint-terminfo-terminal "dumb")
         (user-error "error: `native-complete-setup-bash' not called. Bash is not setup")))
