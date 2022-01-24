@@ -257,7 +257,7 @@ emulator."
     (unless (cl-letf (((point) prompt-point))
               (looking-back comint-prompt-regexp (line-beginning-position 0)))
       (user-error "error: prompt does not match `comint-prompt-regex'. expected '%s', found '%s'"
-                  comint-prompt-regexp (buffer-substring (line-beginning-position) (point))))
+                  comint-prompt-regexp (buffer-substring (line-beginning-position 0) prompt-point)))
     (when (eq 'bash completion-style)
       (when (equal comint-terminfo-terminal "dumb")
         (user-error "error: `native-complete-setup-bash' not called. Bash is not setup")))
