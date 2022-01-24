@@ -265,8 +265,8 @@ emulator."
       (user-error "error: `comint-prompt-regexp' has not been updated. See README for details.\n"))
     (unless (cl-letf (((point) prompt-point))
               (native-complete--at-prompt-p comint-prompt-regexp))
-      (user-error "error: prompt does not match `comint-prompt-regex'. expected '%s', found '%s'"
-                  comint-prompt-regexp (buffer-substring (line-beginning-position) prompt-point)))
+      (user-error "error: current prompt does not match `comint-prompt-regex'.\nprompt -> '%s'\nregex -> %s"
+                  (buffer-substring (line-beginning-position) prompt-point)comint-prompt-regexp))
     (when (eq 'bash completion-style)
       (when (equal comint-terminfo-terminal "dumb")
         (user-error "error: `native-complete-setup-bash' not called. Bash is not setup")))
