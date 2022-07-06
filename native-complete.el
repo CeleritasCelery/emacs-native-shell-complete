@@ -270,7 +270,7 @@ emulator."
     (when (eq 'bash completion-style)
       (when (equal comint-terminfo-terminal "dumb")
         (user-error "error: `native-complete-setup-bash' not called. Bash is not setup")))
-    (if (featurep 'company)
+    (if (bound-and-true-p company-mode)
         (unless (native-complete-tree-assoc 'company-native-complete company-backends)
           (user-error "error: `company-native-complete' not one of `company-backends'"))
       (unless (native-complete-tree-assoc 'native-complete-at-point completion-at-point-functions)
