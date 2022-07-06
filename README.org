@@ -38,17 +38,17 @@ You need to set the variable ~comint-prompt-regex~ to a regex that will match yo
 
 ** shell setup
 *** bash
-Run ~native-complete-setup-bash~ in Emacs /before/ you load your first shell.  
-(Add this to your emacs configuration file.)
+Run ~native-complete-setup-bash~ in Emacs /before/ you load your first shell. Add this to your emacs configuration file.
 #+BEGIN_SRC elisp
   (with-eval-after-load 'shell
     (native-complete-setup-bash))
 #+END_SRC
 
 If the ~HISTCONTROL~ environment variable is not set to ~ignorespace~ or ~ignoreboth~
-you will get a lot of garbage in your shell history.
+you will get a lot of garbage in your shell history. We also need to disable bracketed-paste. Add these to your ~.bashrc~ file.
 #+BEGIN_SRC sh
   export HISTCONTROL=ignoreboth
+  bind 'set enable-bracketed-paste off'
 #+END_SRC
 
 *** csh
