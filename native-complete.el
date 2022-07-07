@@ -54,6 +54,9 @@ Any candidates matching this regex will not be included in final
   :type 'regexp)
 
 (defcustom native-complete-style-suffix-alist
+  ;; Bash is a little odd in that this command will insert inline (not create a
+  ;; new prompt). So we cut and paste it into an echo command so it works with
+  ;; redirection.
   '((bash . "\e*' echo '")
     (zsh . "y")
     (csh . "y")
