@@ -3,7 +3,7 @@
 [[https://melpa.org/#/native-complete][file:https://melpa.org/packages/native-complete-badge.svg]]
 [[https://github.com/CeleritasCelery/emacs-native-shell-complete/actions?query=workflow%3ACI][file:https://github.com/CeleritasCelery/emacs-native-shell-complete/workflows/CI/badge.svg]]
 
-This package provides the exact same completions in ~shell-mode~ as you get in a [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Terminal-emulator.html][terminal emulator]] with the =TAB= key. This means that completions are always accurate and synchronized with your current directory and shell environment. This also means that subshell completion works correctly. This is in contrast to packages like [[https://github.com/szermatt/emacs-bash-completion][emacs-bash-completion]] that use a separate process to generate "best guess" completions. [[https://coredumped.dev/2020/01/04/native-shell-completion-in-emacs/][Blog]]
+This package provides the exact same completions in ~shell-mode~ as you get in a [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Terminal-emulator.html][terminal emulator]] with the =TAB= key. This means that completions are always accurate and synchronized with your current directory and shell environment. This also means that subshell completion works correctly. [[https://coredumped.dev/2020/01/04/native-shell-completion-in-emacs/][Blog]]
 
 [[file:images/demo.gif]]
 
