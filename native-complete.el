@@ -161,11 +161,14 @@ See `native-complete-style-suffix-alist'."
          (beg (process-mark proc))
          (end (point))
          (cmd (buffer-substring-no-properties beg end))
-         (style (cl-letf (((point) beg)) (native-complete-get-completion-style)))
+         (style (save-excursion
+                  (goto-char beg)
+                  (native-complete-get-completion-style)))
          ;; sanity check makes sure the input line is empty, which is
          ;; not useful when doing input completion
          (comint-redirect-perform-sanity-check nil))
-    (unless (cl-letf (((point) beg))
+    (unless (save-excursion
+              (goto-char beg)
               (native-complete--at-prompt-p comint-prompt-regexp))
       (user-error "`comint-prompt-regexp' does not match prompt"))
     (with-current-buffer redirect-buffer (erase-buffer))
@@ -261,12 +264,14 @@ emulator."
   (unless (memq major-mode native-complete-major-modes)
     (user-error "`native-complete-check-setup' must be run from a shell buffer"))
   (let* ((prompt-point (process-mark (get-buffer-process (current-buffer))))
-         (completion-style (cl-letf (((point) prompt-point))
+         (completion-style (save-excursion
+                             (goto-char promp-point)
                              (native-complete-get-completion-style)))
          (inhibit-field-text-motion t))
     (when (equal comint-prompt-regexp "^")
       (user-error "error: `comint-prompt-regexp' has not been updated. See README for details.\n"))
-    (unless (cl-letf (((point) prompt-point))
+    (unless (save-excursion
+              (goto-char prompt-point)
               (native-complete--at-prompt-p comint-prompt-regexp))
       (user-error "error: current prompt does not match `comint-prompt-regex'.\nprompt -> '%s'\nregex -> %s"
                   (buffer-substring (line-beginning-position) prompt-point)comint-prompt-regexp))
