@@ -30,10 +30,10 @@ For users of the add-on company package ~company-native-complete~ provides a fun
 (add-to-list 'company-backends 'company-native-complete)
 #+end_src
 
-*** Customize the prompt regex
-You need to set the variable ~comint-prompt-regex~ to a regex that will match your shell prompt. The following is a good default for ~bash~, ~zsh~, and ~csh~.
+*** Customize the prompt regexp
+You need to set the variable ~comint-prompt-regexp~ to a regex that will match your shell prompt. The following is a good default for ~bash~, ~zsh~, and ~csh~.
 #+begin_src elisp
-  (add-hook 'shell-mode-hook (lambda () (setq comint-prompt-regex "^.+[$%>] ")))
+  (add-hook 'shell-mode-hook (lambda () (setq comint-prompt-regexp "^.+[$%>] ")))
 #+end_src
 
 ** shell setup
