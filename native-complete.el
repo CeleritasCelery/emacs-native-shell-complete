@@ -265,7 +265,7 @@ emulator."
     (user-error "`native-complete-check-setup' must be run from a shell buffer"))
   (let* ((prompt-point (process-mark (get-buffer-process (current-buffer))))
          (completion-style (save-excursion
-                             (goto-char promp-point)
+                             (goto-char prompt-point)
                              (native-complete-get-completion-style)))
          (inhibit-field-text-motion t))
     (when (equal comint-prompt-regexp "^")
