@@ -93,6 +93,7 @@ This involves not sending the `--noediting' argument as well as
 setting `TERM' to a value other then dumb."
   (interactive)
   (when (equal comint-terminfo-terminal "dumb")
+    (setenv "MC_SID" "1") ;; Needed for csh on some linux distros
     (setq comint-terminfo-terminal "vt50"))
   (setq explicit-bash-args
         (delete "--noediting" explicit-bash-args)))
