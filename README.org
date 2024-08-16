@@ -13,6 +13,7 @@ Currently this has been tested in
 - csh
 - zsh
 - sqlite
+- TCL
 
 * Setup steps
 **  Emacs setup
@@ -28,12 +29,6 @@ For users of the add-on company package ~company-native-complete~ provides a fun
 
 #+begin_src elisp
 (add-to-list 'company-backends 'company-native-complete)
-#+end_src
-
-*** Customize the prompt regexp
-You need to set the variable ~comint-prompt-regexp~ to a regex that will match your shell prompt. The following is a good default for ~bash~, ~zsh~, and ~csh~.
-#+begin_src elisp
-  (add-hook 'shell-mode-hook (lambda () (setq comint-prompt-regexp "^.+[$%>] ")))
 #+end_src
 
 ** shell setup
@@ -62,7 +57,7 @@ Once the above steps are complete, run ~native-complete-check-config~ in a shell
 ** Advanced setup
 For most users this package should work out the box after the above steps. However if you are using an unusual shell or are invoking subshells that are a different type then your main shell, you may need add some additional configuration.
 
-Native complete look at the shell prompt or process name to determine which completion style to use. A completion style is the key used to get the candidates from the native shell. Most shells support ~<tab>~ , but some shells won't give you all the candidates consistently without using a different style (key sequence). There are currently the following completion styles:
+Native complete looks at the shell prompt or process name to determine which completion style to use. A completion style is the key used to get the candidates from the native shell. Most shells support ~<tab>~ , but some shells won't give you all the candidates consistently without using a different style (key sequence). There are currently the following completion styles:
 
 - bash ::   ~M-*~
 - zsh ::  ~C-D~
@@ -81,4 +76,7 @@ You can add your own completion styles by adding to ~native-complete-style-suffi
 ~native-complete-exclude-regex~ is a regular expression that is used to match potential candidates that should not appear in the final completion list.
 
 *** prompt components in completion list
- if you encouter an issue where parts of your shell prompt are showing up as completion candidates you can add a function to ~comint-redirect-filter-functions~ to remove the prompt line from the process output. See the doc string of that variable for more details.
+if you encouter an issue where parts of your shell prompt are showing up as completion candidates you can add a function to ~comint-redirect-filter-functions~ to remove the prompt line from the process output. See the doc string of that variable for more details.
+
+*** non-standard prompts
+This package should handle your shell prompt automatically so long as it ends with a common prompt character (~#~, ~$~, ~%~, or ~>~). If it does not, then you will need to set the variable ~comint-prompt-regexp~ to a regex that will match your complete shell prompt.

@@ -86,6 +86,9 @@ need for the other methods as well."
                               ,@(mapcar (lambda (pair) `(const ,(car pair)))
                                         native-complete-style-suffix-alist))))
 
+(defvar native-complete-prompt-regexp "[%$>#] "
+  "A simple prompt that will match most unconfigured shells.")
+
 ;;;###autoload
 (defun native-complete-setup-bash ()
   "Setup support for native-complete enabled bash shells.
@@ -114,6 +117,17 @@ See `native-complete-style-suffix-alist'."
   (or (alist-get style native-complete-style-suffix-alist)
       (alist-get 'default native-complete-style-suffix-alist)))
 
+(defun native-complete--get-prompt ()
+  "Get the current prompt of the buffer.
+This will be used to match the end of output in redirection."
+  (if (equal comint-prompt-regexp native-complete-prompt-regexp)
+      (let ((inhibit-field-text-motion t)
+            (prompt-point (process-mark (get-buffer-process (current-buffer)))))
+        (regexp-quote (buffer-substring-no-properties
+                       (line-beginning-position)
+                       prompt-point)))
+    comint-prompt-regexp))
+
 (defun native-complete--at-prompt-p (regex)
   "Point matches the end of a prompt defined by REGEX"
   ;; `inhibit-field-text-motion' alows `line-beginning-position' to move past
@@ -137,7 +151,17 @@ See `native-complete-style-suffix-alist'."
 (defun native-complete--usable-p ()
   "Return non-nil if native-complete can be used at point."
   (and (memq major-mode native-complete-major-modes)
-       (not (native-complete--redirection-active-p))))
+       (not (native-complete--redirection-active-p))
+       (save-excursion
+         (goto-char (process-mark (get-buffer-process (current-buffer))))
+         (native-complete--at-prompt-p comint-prompt-regexp))))
+
+(defun native-complete-init ()
+  "Initialize native complete in the current buffer."
+  ;; If the user has not set the prompt regexp, we will assume it is a simple
+  ;; prompt and use our own.
+  (when (equal comint-prompt-regexp (default-value 'comint-prompt-regexp))
+    (setq-local comint-prompt-regexp native-complete-prompt-regexp)))
 
 (defun native-complete-abort (&rest _)
   "Abort completion and cleanup redirect if needed."
@@ -168,10 +192,6 @@ See `native-complete-style-suffix-alist'."
          ;; sanity check makes sure the input line is empty, which is
          ;; not useful when doing input completion
          (comint-redirect-perform-sanity-check nil))
-    (unless (save-excursion
-              (goto-char beg)
-              (native-complete--at-prompt-p comint-prompt-regexp))
-      (user-error "`comint-prompt-regexp' does not match prompt"))
     (with-current-buffer redirect-buffer (erase-buffer))
     (setq cmd (replace-regexp-in-string (rx (in "'\"")) "" cmd))
     (cl-destructuring-bind (common . prefix) (native-complete--split-command cmd)
@@ -213,7 +233,10 @@ See `native-complete-style-suffix-alist'."
                      (goto-char (match-end 1))
                      (insert " "))
                    (buffer-string))))
-    (thread-last (split-string buffer "\n\n")
+    (thread-last
+      (split-string buffer "\n\n")
+      (car)
+      (split-string buffer "K")
       (car)
       (ansi-color-filter-apply)
       (replace-regexp-in-string echo-cmd "")
@@ -236,19 +259,21 @@ See `native-complete-style-suffix-alist'."
   "Get the candidates from the underlying shell.
 This should behave the same as sending TAB in an terminal
 emulator."
+  (native-complete-init)
   (when (native-complete--usable-p)
-    (native-complete--get-prefix)
-    (comint-redirect-send-command
-     native-complete--redirection-command
-     native-complete--buffer nil t)
-    (unwind-protect
-        (while (or quit-flag (null comint-redirect-completed))
-          (accept-process-output nil 0.1))
-      (unless comint-redirect-completed
-        (comint-redirect-cleanup)))
-    (list (- (point) (length native-complete--prefix))
-          (point)
-          (native-complete--get-completions))))
+    (let ((comint-prompt-regexp (native-complete--get-prompt)))
+      (native-complete--get-prefix)
+      (comint-redirect-send-command
+       native-complete--redirection-command
+       native-complete--buffer nil t)
+      (unwind-protect
+          (while (or quit-flag (null comint-redirect-completed))
+            (accept-process-output nil 0.1))
+        (unless comint-redirect-completed
+          (comint-redirect-cleanup)))
+      (list (- (point) (length native-complete--prefix))
+            (point)
+            (native-complete--get-completions)))))
 
 (defun native-complete-tree-assoc (key tree)
   "Search a list tree structure for key."
@@ -275,7 +300,7 @@ emulator."
               (goto-char prompt-point)
               (native-complete--at-prompt-p comint-prompt-regexp))
       (user-error "error: current prompt does not match `comint-prompt-regex'.\nprompt -> '%s'\nregex -> %s"
-                  (buffer-substring (line-beginning-position) prompt-point)comint-prompt-regexp))
+                  (buffer-substring (line-beginning-position) prompt-point) comint-prompt-regexp))
     (when (eq 'bash completion-style)
       (when (equal comint-terminfo-terminal "dumb")
         (user-error "error: `native-complete-setup-bash' not called. Bash is not setup")))

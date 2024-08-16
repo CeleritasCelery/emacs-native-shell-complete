@@ -35,16 +35,19 @@
 (defun company-native-complete--candidates (callback)
   "Get candidates for `company-native-complete'.
 Send results by calling CALLBACK."
-  (add-hook 'comint-redirect-hook
-            (lambda ()
-              (setq comint-redirect-hook nil)
-              (funcall callback (native-complete--get-completions))))
-  (comint-redirect-send-command
-   native-complete--redirection-command
-   native-complete--buffer nil t))
+  (let ((comint-prompt-regexp (native-complete--get-prompt)))
+    (add-hook 'comint-redirect-hook
+              (lambda ()
+                (setq comint-redirect-hook nil)
+                (let ((comint-prompt-regexp comint-prompt-regexp))
+                  (funcall callback (native-complete--get-completions)))))
+    (comint-redirect-send-command
+     native-complete--redirection-command
+     native-complete--buffer nil t)))
 
 (defun company-native-complete--prefix ()
   "Get prefix for `company-native-complete'."
+  (native-complete-init)
   (when (native-complete--usable-p)
     (native-complete--get-prefix)
     (cond
